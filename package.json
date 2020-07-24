@@ -1,0 +1,29 @@
+{
+  "name": "capstone",
+  "version": "1.0.0",
+  "description": "The Readings action for a smart display application.",
+  "main": "index.html",
+  "scripts": {
+    "jslint": "eslint \"**/*.js\"",
+    "jslint:fix": "eslint --fix \"**/*.js\"",
+    "test": "npm run jslint",
+    "serve": "firebase serve",
+    "deploy": "firebase deploy",
+    "csslint": "npx stylelint '**/*.css'"
+  },
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "eslint-config-google": "^0.9.1",
+    "stylelint-config-standard": "^20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arboghast/STEP-capstone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Arboghast/STEP-capstone/issues"
+  },
+  "homepage": "https://github.com/Arboghast/STEP-capstone#readme"
+}
