@@ -1,0 +1,10 @@
+handlers:
+- name: welcome
+- name: instructions
+- name: restart
+- name: fallback
+- name: change_color
+- name: start_spin
+- name: stop_spin
+inlineCloudFunction:
+  executeFunction: Fulfillment
