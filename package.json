@@ -2,7 +2,7 @@
   "name": "capstone",
   "version": "1.0.0",
   "description": "The Readings action for a smart display application.",
-  "main": "index.html",
+  "main": "public/index.html",
   "scripts": {
     "jslint": "eslint \"**/*.js\"",
     "jslint:fix": "eslint --fix \"**/*.js\"",

@@ -1,0 +1,5 @@
+handlers:
+- name: welcome
+- name: fallback
+inlineCloudFunction:
+  executeFunction: ActionsOnGoogleFulfillment

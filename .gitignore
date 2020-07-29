@@ -2,3 +2,4 @@
 package-lock.json
 .firebase
 /backend/Webhooks/Fufilment/node_modules
+/backend/Webhooks/Fufilment/serviceAccountKey.json
