@@ -1,5 +1,6 @@
 /node_modules
 package-lock.json
 .firebase
-/backend/Webhooks/Fufilment/node_modules
-/backend/Webhooks/Fufilment/serviceAccountKey.json
+/sdk/webhooks/ActionsOnGoogleFulfillment/node_modules
+/sdk/webhooks/ActionsOnGoogleFulfillment/serviceAccountKey.json
+/sdk/webhooks/ActionsOnGoogleFulfillment/package-lock.json

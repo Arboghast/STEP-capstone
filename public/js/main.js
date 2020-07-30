@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import {Action} from './action.js';
-import {Scene} from './scene.js';
+import {Home} from './home.js';
 
 window.addEventListener('load', () => {
-  window.scene = new Scene();
+  window.scene = new Home();
 
   // Set Google Assistant Canvas Action at scene level
   window.scene.action = new Action(scene);
