@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action} from './action.js';
-import {Home} from './home.js';
+import {Action} from './Action.js';
+import {Home} from './Home.js';
 
 window.addEventListener('load', () => {
   window.scene = new Home();

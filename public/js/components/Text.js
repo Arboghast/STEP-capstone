@@ -7,15 +7,17 @@ export class Text{
      * Initializes the game with visual components.
      */
 
-    textContainer = document.createElement("p");
+    textContainer = document.createElement("div");
+    text = document.createElement("p");
 
     constructor() {
+        this.textContainer.appendChild(this.text);
         this.textContainer.classList.add("flex-center");
         this.textContainer.setAttribute("id","book-text");
     }
 
     setText(newText) {
-        this.textContainer.innerText = newText;
+        this.text.innerText = newText;
     }
 
     getText() {

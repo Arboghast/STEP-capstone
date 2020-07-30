@@ -16,8 +16,10 @@ export class Library{
         let books = document.createElement("div");
         books.classList.add("bookshelf");
         
-        //temp place holder, make it dynamic
-        let gw = new Book("child Stories", "null.jpg");
+        //->temp place holder, make it dynamic
+        //->add onclick on the book objects to send a textquery
+        //to the backend and force a server-side scene switch to the text object
+        let gw = new Book("child Stories", "bc.jpg");
         books.appendChild(gw.getbook());
         this.libraryContainer.appendChild(books);
     }

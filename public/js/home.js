@@ -19,6 +19,7 @@ export class Home{
     this.view.getElementsByClassName('stats')[0].appendChild(stats.domElement);
     
     this.view.appendChild(this.library.getLibrary());
+    //this.view.appendChild(this.text.getText());
   }
 
   openText(){
