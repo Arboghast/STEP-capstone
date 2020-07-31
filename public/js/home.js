@@ -31,4 +31,12 @@ export class Home{
     this.view.removeChild(this.text.getText());
     this.view.appendChild(this.library.getLibrary());
   }
+
+  getLibrary(){
+    return this.library;
+  }
+
+  getText(){
+    return this.text;
+  }
 }

@@ -1,7 +1,21 @@
+conditionalEvents:
+- condition: scene.slots.status == "FINAL"
+  handler:
+    webhookHandler: bookSelected
+  transitionToScene: TEXT
 onEnter:
   staticPrompt:
     candidates:
     - promptResponse:
         firstSimple:
           variants:
-          - speech: Loading the library...
+          - speech: What is the title of the book you would like to read?
+        suggestions:
+        - title: gw-test
+slots:
+- commitBehavior:
+    writeSessionParam: bookTitle
+  name: bookTitle
+  required: true
+  type:
+    name: Book

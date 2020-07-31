@@ -32,6 +32,45 @@ app.handle("fallback", (conv) => {
   conv.add(new Canvas());
 });
 
+app.handle("bookSelected", (conv) => {
+  const bookTitle = conv.session.params.bookTitle; //cannot be null
+
+  //Using user storage to keep track of book progress
+  const chunkNumber = conv.user.params.books[booktitle] //json objet
+  ? conv.user.params.books[booktitle] : 0; //start of the book
+
+  let chunkNumber;
+  if(conv.user.params.books.hasOwnProperty(bookTitle)){
+    chunkNumber = conv.user.params.books[booktitle];
+  }else{
+    chunkNumber = 0; 
+    Object.defineProperty(conv.user.params.books, bookTitle, {
+      value: 0,
+      writable: true
+    })
+  }
+
+    conv.add('Loading Book...');
+    conv.add(new Canvas({
+      data: {
+        command: "BOOK_SELECTED",
+        text: textData["Child Stories"][0]
+      }
+    }));
+});
+
+app.handle("analyseUserInput", (conv) => {
+
+});
+
+app.handle("openLibrary", (conv) => {
+
+});
+
+app.handle("openText", (conv) => {
+
+});
+
 // app.handle("change_color", (conv) => {
 //   const color = conv.intent.params.color
 //     ? conv.intent.params.color.resolved

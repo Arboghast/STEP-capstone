@@ -16,6 +16,8 @@ export class Action {
         //to the library container
       },
       BOOK_SELECTED: (data) => {
+        this.scene.getText().setText(data.text);
+        this.scene.openText();
         //Parse the data-json
         //create a Text() object and display it on the screen
       },
@@ -23,10 +25,16 @@ export class Action {
         //Save the users current position in the currently opened book
         //via local storage or w.e. method you come up with
       },
+      CHANGE_TEXT: (data) => { 
+        //send the api the index we are on, if ommited, assume 0,
+        //keep counter on the frontend to track current index;
+        this.scene.getText().setText(data.text);
+      }
     };
     this.commands.WRITE_TO_LIBRARY.bind(this);
     this.commands.BOOK_SELECTED.bind(this);
     this.commands.SAVE_POSITION.bind(this);
+    this.commands.CHANGE_TEXT.bind(this);
   }
 
   /**

@@ -1,5 +1,8 @@
 handlers:
 - name: welcome
 - name: fallback
+- name: bookSelected
+- name: analyseUserInput
+- name: openLibrary
 inlineCloudFunction:
   executeFunction: ActionsOnGoogleFulfillment

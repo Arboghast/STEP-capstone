@@ -3,6 +3,6 @@ defaultLocale: en
 localizedSettings:
   displayName: Reading Rainbow
   pronunciation: Reading Rainbow
-  voice: male_2
+  voice: male_3
 projectId: reading-dc6dd
 usesInteractiveCanvas: true
