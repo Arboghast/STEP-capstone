@@ -4,5 +4,6 @@ handlers:
 - name: bookSelected
 - name: analyseUserInput
 - name: openLibrary
+- name: nextChunk
 inlineCloudFunction:
   executeFunction: ActionsOnGoogleFulfillment

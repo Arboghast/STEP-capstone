@@ -36,25 +36,23 @@ app.handle("bookSelected", (conv) => {
   const bookTitle = conv.session.params.bookTitle; //cannot be null
 
   //Using user storage to keep track of book progress
-  const chunkNumber = conv.user.params.books[booktitle] //json objet
-  ? conv.user.params.books[booktitle] : 0; //start of the book
-
+  //USER STORAGE NOT WORKING AS INTENDED
   let chunkNumber;
-  if(conv.user.params.books.hasOwnProperty(bookTitle)){
-    chunkNumber = conv.user.params.books[booktitle];
+  if(conv.user.params[bookTitle] != undefined)
+  {
+    chunkNumber = conv.user.params[bookTitle];
   }else{
     chunkNumber = 0; 
-    Object.defineProperty(conv.user.params.books, bookTitle, {
-      value: 0,
-      writable: true
-    })
+    conv.user.params[bookTitle] = 0;
   }
+
+  conv.user.params.currentBook = bookTitle;
 
     conv.add('Loading Book...');
     conv.add(new Canvas({
       data: {
         command: "BOOK_SELECTED",
-        text: textData["Child Stories"][0]
+        text: textData[bookTitle][chunkNumber]
       }
     }));
 });
@@ -64,71 +62,25 @@ app.handle("analyseUserInput", (conv) => {
 });
 
 app.handle("openLibrary", (conv) => {
-
+    conv.user.params.currentBook = null;
+    conv.add(new Canvas({
+      data: {
+        command: "OPEN_LIBRARY"
+      }
+    }));
 });
 
-app.handle("openText", (conv) => {
-
-});
-
-// app.handle("change_color", (conv) => {
-//   const color = conv.intent.params.color
-//     ? conv.intent.params.color.resolved
-//     : null;
-//   if (!(color in tints)) {
-//     conv.add(`Sorry, I don't know that color. Try red, blue, or green!`);
-//     conv.add(new Canvas());
-//     return;
-//   }
-//   conv.add(`Ok, I changed my color to ${color}. What else?`);
-//   conv.add(
-//     new Canvas({
-//       data: {
-//         command: "TINT",
-//         tint: tints[color],
-//       },
-//     })
-//   );
-// });
-
-// app.handle("start_spin", (conv) => {
-//   conv.add(`Ok, I'm spinning. What else?`);
-//   conv.add(
-//     new Canvas({
-//       data: {
-//         command: "SPIN",
-//         spin: true,
-//       },
-//     })
-//   );
-// });
-
-// app.handle("stop_spin", (conv) => {
-//   conv.add("Ok, I paused spinning. What else?");
-//   conv.add(
-//     new Canvas({
-//       data: {
-//         command: "SPIN",
-//         spin: false,
-//       },
-//     })
-//   );
-// });
-
-// app.handle("instructions", (conv) => {
-//   conv.add(INSTRUCTIONS);
-//   conv.add(new Canvas());
-// });
-
-// app.handle("restart", (conv) => {
-//   conv.add(INSTRUCTIONS);
-//   conv.add(
-//     new Canvas({
-//       data: {
-//         command: "RESTART_GAME",
-//       },
-//     })
-//   );
-// });
+//HANDLE OUT OF BOUNDS ERROR
+app.handle("nextChunk", (conv) => {
+  const bookTitle = conv.user.params.currentBook;
+    conv.user.params[bookTitle] += 1;
+    let chunkNumber = conv.user.params[bookTitle];
+    conv.add(new Canvas({
+      data: {
+        command: "CHANGE_TEXT",
+        text: textData[bookTitle][chunkNumber]
+      }
+    }));
+})
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);

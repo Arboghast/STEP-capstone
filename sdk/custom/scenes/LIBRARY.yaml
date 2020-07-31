@@ -11,7 +11,7 @@ onEnter:
           variants:
           - speech: What is the title of the book you would like to read?
         suggestions:
-        - title: gw-test
+        - title: Child Stories
 slots:
 - commitBehavior:
     writeSessionParam: bookTitle
