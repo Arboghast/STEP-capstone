@@ -21,4 +21,4 @@ slots:
   name: userInput
   required: true
   type:
-    name: User_Input
+    name: Input
