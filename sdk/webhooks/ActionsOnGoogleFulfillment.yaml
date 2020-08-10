@@ -3,7 +3,7 @@ handlers:
 - name: fallback
 - name: bookSelected
 - name: analyseUserInput
-- name: openLibrary
 - name: nextChunk
+- name: restartBook
 inlineCloudFunction:
   executeFunction: ActionsOnGoogleFulfillment

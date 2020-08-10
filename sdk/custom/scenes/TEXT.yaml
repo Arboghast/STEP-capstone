@@ -2,15 +2,16 @@ conditionalEvents:
 - condition: scene.slots.status == "FINAL"
   handler:
     webhookHandler: analyseUserInput
-  transitionToScene: TEXT
 intentEvents:
-- handler:
-    webhookHandler: toggleScene
-  intent: LIBRARY
+- intent: GOTO_LIBRARY
   transitionToScene: LIBRARY
 - handler:
     webhookHandler: nextChunk
   intent: NEXT
+  transitionToScene: TEXT
+- handler:
+    webhookHandler: restartBook
+  intent: RESTART
   transitionToScene: TEXT
 slots:
 - commitBehavior:

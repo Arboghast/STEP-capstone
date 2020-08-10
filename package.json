@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/Arboghast/STEP-capstone/issues"
   },
-  "homepage": "https://github.com/Arboghast/STEP-capstone#readme"
+  "homepage": "https://github.com/Arboghast/STEP-capstone#readme",
+  "dependencies": {
+    "mark.js": "^8.11.1"
+  }
 }

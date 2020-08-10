@@ -13,16 +13,18 @@ const textData = require("./mockTextData.json");
 const app = conversation({ debug: true });
 
 app.handle("welcome", (conv) => {
-  const supportsInteractiveCanvas = conv.device.capabilities.includes("INTERACTIVE_CANVAS");
+  const supportsInteractiveCanvas = conv.device.capabilities.includes(
+    "INTERACTIVE_CANVAS"
+  );
   if (!supportsInteractiveCanvas) {
     conv.add("Sorry, this device does not support Interactive Canvas!");
     conv.scene.next.name = "actions.page.END_CONVERSATION";
     return;
   }
-  conv.add('Welcome to Reading with the Google Assistant!');
+  conv.add("Welcome to Reading with the Google Assistant!");
   conv.add(
     new Canvas({
-      url: 'https://reading-dc6dd.web.app'
+      url: "https://reading-dc6dd.web.app",
     })
   );
 });
@@ -38,49 +40,115 @@ app.handle("bookSelected", (conv) => {
   //Using user storage to keep track of book progress
   //USER STORAGE NOT WORKING AS INTENDED
   let chunkNumber;
-  if(conv.user.params[bookTitle] != undefined)
-  {
+  if (conv.user.params[bookTitle] != undefined) {
     chunkNumber = conv.user.params[bookTitle];
-  }else{
-    chunkNumber = 0; 
+  } else {
+    chunkNumber = 0;
     conv.user.params[bookTitle] = 0;
   }
 
   conv.user.params.currentBook = bookTitle;
 
-    conv.add('Loading Book...');
-    conv.add(new Canvas({
+  conv.add("Loading Book...");
+  let text;
+  if(chunkNumber >= textData[bookTitle].length)
+  {
+    text = "The End."
+    conv.add("You can say Restart Book or Go Back To The Library.");
+  }
+  else{
+    text = textData[bookTitle][chunkNumber];
+  }
+  conv.add(
+    new Canvas({
       data: {
         command: "BOOK_SELECTED",
-        text: textData[bookTitle][chunkNumber]
-      }
-    }));
+        text: text,
+      },
+    })
+  );
 });
 
 app.handle("analyseUserInput", (conv) => {
+  const userInput = conv.session.params.userInput;
+  const bookTitle = conv.user.params.currentBook;
+
+  const text = textData[bookTitle][conv.user.params[bookTitle]];
+
+  //A naive text matching algorithm
+  let matchedText;
+  let remainingText;
+
+  if(!remainingText){
+    conv.add(
+      new Canvas({
+        data: {
+          command: "TEXT_FEEDBACK",
+          matched: matchedText,
+          remaining: remainingText
+        },
+      })
+    );
+  }
+  else
+  {
+    conv.add(
+      new Canvas({
+        data: {
+          command: ""
+        }
+      })
+    )
+  }
 
 });
 
 app.handle("openLibrary", (conv) => {
     conv.user.params.currentBook = null;
-    conv.add(new Canvas({
+  conv.add(
+    new Canvas({
       data: {
         command: "OPEN_LIBRARY"
-      }
-    }));
+      },
+    })
+  );
 });
 
-//HANDLE OUT OF BOUNDS ERROR
 app.handle("nextChunk", (conv) => {
   const bookTitle = conv.user.params.currentBook;
-    conv.user.params[bookTitle] += 1;
-    let chunkNumber = conv.user.params[bookTitle];
-    conv.add(new Canvas({
+  conv.user.params[bookTitle] += 1;
+  let chunkNumber = conv.user.params[bookTitle];
+  let text;
+  if(chunkNumber >= textData[bookTitle].length)
+  {
+    text = "The End."
+    conv.add("You can say Restart Book or Go Back To The Library.");
+  }
+  else{
+    text = textData[bookTitle][chunkNumber];
+  }
+  conv.add(
+    new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: textData[bookTitle][chunkNumber]
-      }
-    }));
+        text: text,
+      },
+    })
+  );
+});
+
+app.handle("restartBook", (conv) =>{
+  const bookTitle = conv.user.params.currentBook;
+  conv.user.params[bookTitle] = 0;
+  let chunkNumber = 0;
+  conv.add(
+    new Canvas({
+      data: {
+        command: "CHANGE_TEXT",
+        text: textData[bookTitle][chunkNumber],
+      },
+    })
+  );
 })
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);

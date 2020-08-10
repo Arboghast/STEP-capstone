@@ -37,4 +37,12 @@ export class Library{
     getLibrary(){
         return this.libraryContainer;
     }
+
+    hideLibrary(){
+        this.libraryContainer.setAttribute("style","display:none");
+    }
+
+    showLibrary(){
+        this.libraryContainer.setAttribute("style", "display:flex");
+    }
 }

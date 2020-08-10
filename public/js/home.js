@@ -19,17 +19,19 @@ export class Home{
     this.view.getElementsByClassName('stats')[0].appendChild(stats.domElement);
     
     this.view.appendChild(this.library.getLibrary());
-    //this.view.appendChild(this.text.getText());
+    this.view.appendChild(this.text.getText());
+    this.openLibrary();
   }
 
   openText(){
-    this.view.removeChild(this.library.getLibrary());
-    this.view.appendChild(this.text.getText());
+    this.text.showText();
+    this.library.hideLibrary();
+    this.text.setInstance("said");
   }
 
   openLibrary(){
-    this.view.removeChild(this.text.getText());
-    this.view.appendChild(this.library.getLibrary());
+    this.text.hideText();
+    this.library.showLibrary();
   }
 
   getLibrary(){
