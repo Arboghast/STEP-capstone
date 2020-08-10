@@ -3,7 +3,9 @@ conditionalEvents:
   handler:
     webhookHandler: analyseUserInput
 intentEvents:
-- intent: GOTO_LIBRARY
+- handler:
+    webhookHandler: openLibrary
+  intent: GOTO_LIBRARY
   transitionToScene: LIBRARY
 - handler:
     webhookHandler: nextChunk

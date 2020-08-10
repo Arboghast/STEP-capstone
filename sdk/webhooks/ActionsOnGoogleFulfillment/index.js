@@ -104,7 +104,7 @@ app.handle("analyseUserInput", (conv) => {
 });
 
 app.handle("openLibrary", (conv) => {
-    conv.user.params.currentBook = null;
+  conv.user.params.currentBook = null;
   conv.add(
     new Canvas({
       data: {
