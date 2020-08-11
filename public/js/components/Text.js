@@ -1,3 +1,4 @@
+import {lumin} from "../../lumin.min.js";
 /**
  * Book Text Viewer Scene
  */
@@ -13,10 +14,26 @@ export class Text{
         this.textContainer.appendChild(this.text);
         this.textContainer.classList.add("flex-center");
         this.textContainer.setAttribute("id","book-text");
+        this.text.setAttribute("style", "display: flex");
     }
 
     setText(newText) {
         this.text.innerText = newText;
+    }
+
+    highlight(){
+        let luminator = lumin(this.textContainer);
+        luminator.start(6000);
+        this.textContainer.lastChild.setAttribute("style", "position: relative");
+        this.textContainer.lastChild.lastChild.setAttribute("style", "display: flex");
+    }
+
+    showBookText(){
+        this.text.setAttribute("style", "display: flex");
+    }
+
+    hideBookText(){
+        this.text.setAttribute("style", "display: none");
     }
 
     getText() {

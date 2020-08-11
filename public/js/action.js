@@ -30,6 +30,7 @@ export class Action {
         this.scene.openLibrary();
       },
       TEXT_FEEDBACK: async (data) => {
+        this.scene.getText().hideBookText();
         this.scene.getText().setText(data.matched);
       },
     };
@@ -57,7 +58,13 @@ export class Action {
       },
       onTtsMark: async (markName) => {
         if (markName === "FIN") {
+          let textContainer = document.getElementById("book-text");
+          textContainer.removeChild(textContainer.lastChild);
+          this.scene.getText().showBookText();
           await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
+        }
+        if (markName ==='OK') {
+          this.scene.getText().highlight();
         }
       },
     };

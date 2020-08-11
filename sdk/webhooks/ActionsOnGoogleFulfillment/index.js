@@ -104,7 +104,7 @@ app.handle("analyseUserInput", (conv) => {
           },
         })
       );
-      let ssml = `<speak>${remainingText}<mark name="FIN"/></speak>`;
+      let ssml = `<speak><mark name="OK"/>${remainingText}<mark name="FIN"/></speak>`;
       conv.add(ssml); //for onTtsMark callback
     } else {
       //audio feedback
