@@ -29,13 +29,8 @@ export class Action {
       OPEN_LIBRARY: (data) => {
         this.scene.openLibrary();
       },
-      TEXT_FEEDBACK: async(data) => {
-
-        let res = await this.action.canvas.sendTextQuery('nextChunk');
-        if (res.toUpperCase() !== 'SUCCESS') {
-            console.log(`Request in flight: ${res}`);
-            return;
-        }
+      TEXT_FEEDBACK: async (data) => {
+        this.scene.getText().setText(data.matched);
       },
     };
     this.commands.WRITE_TO_LIBRARY.bind(this);
@@ -58,6 +53,11 @@ export class Action {
           this.commands[data[0].command.toUpperCase()](data[0]);
         } catch (e) {
           // do nothing, when no command is sent or found
+        }
+      },
+      onTtsMark: async (markName) => {
+        if (markName === "FIN") {
+          await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
         }
       },
     };

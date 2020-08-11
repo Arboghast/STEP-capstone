@@ -51,12 +51,10 @@ app.handle("bookSelected", (conv) => {
 
   conv.add("Loading Book...");
   let text;
-  if(chunkNumber >= textData[bookTitle].length)
-  {
-    text = "The End."
+  if (chunkNumber >= textData[bookTitle].length) {
+    text = "The End.";
     conv.add("You can say Restart Book or Go Back To The Library.");
-  }
-  else{
+  } else {
     text = textData[bookTitle][chunkNumber];
   }
   conv.add(
@@ -70,37 +68,58 @@ app.handle("bookSelected", (conv) => {
 });
 
 app.handle("analyseUserInput", (conv) => {
+  //TODO: Acount for user input in the ending screen
   const userInput = conv.session.params.userInput;
   const bookTitle = conv.user.params.currentBook;
 
-  const text = textData[bookTitle][conv.user.params[bookTitle]];
-
-  //A naive text matching algorithm
-  let matchedText;
-  let remainingText;
-
-  if(!remainingText){
+  let chunkNumber = conv.user.params[bookTitle];
+  let text;
+  if (chunkNumber >= textData[bookTitle].length) {
+    text = "The End.";
+    conv.add("You can say Restart Book or Go Back To The Library.");
     conv.add(
       new Canvas({
         data: {
-          command: "TEXT_FEEDBACK",
-          matched: matchedText,
-          remaining: remainingText
+          command: "CHANGE_TEXT",
+          text: text,
         },
       })
     );
-  }
-  else
-  {
-    conv.add(
-      new Canvas({
-        data: {
-          command: ""
-        }
-      })
-    )
-  }
+  } else {
+    text = textData[bookTitle][chunkNumber];
 
+    let Booktext = textData[bookTitle][conv.user.params[bookTitle]];
+
+    //TODO: A naive text matching algorithm
+    let matchedText = userInput;
+    let remainingText = Booktext;
+
+    if (remainingText) {
+      conv.add(
+        new Canvas({
+          data: {
+            command: "TEXT_FEEDBACK",
+            matched: matchedText,
+            remaining: remainingText,
+          },
+        })
+      );
+      let ssml = `<speak>${remainingText}<mark name="FIN"/></speak>`;
+      conv.add(ssml); //for onTtsMark callback
+    } else {
+      //audio feedback
+      //let ssml = `<speak></speak>`
+      conv.user.params[bookTitle] += 1;
+      conv.add(
+        new Canvas({
+          data: {
+            command: "CHANGE_TEXT",
+            text: text,
+          },
+        })
+      );
+    }
+  }
 });
 
 app.handle("openLibrary", (conv) => {
@@ -108,7 +127,7 @@ app.handle("openLibrary", (conv) => {
   conv.add(
     new Canvas({
       data: {
-        command: "OPEN_LIBRARY"
+        command: "OPEN_LIBRARY",
       },
     })
   );
@@ -119,12 +138,10 @@ app.handle("nextChunk", (conv) => {
   conv.user.params[bookTitle] += 1;
   let chunkNumber = conv.user.params[bookTitle];
   let text;
-  if(chunkNumber >= textData[bookTitle].length)
-  {
-    text = "The End."
+  if (chunkNumber >= textData[bookTitle].length) {
+    text = "The End.";
     conv.add("You can say Restart Book or Go Back To The Library.");
-  }
-  else{
+  } else {
     text = textData[bookTitle][chunkNumber];
   }
   conv.add(
@@ -137,7 +154,7 @@ app.handle("nextChunk", (conv) => {
   );
 });
 
-app.handle("restartBook", (conv) =>{
+app.handle("restartBook", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   conv.user.params[bookTitle] = 0;
   let chunkNumber = 0;
@@ -149,6 +166,6 @@ app.handle("restartBook", (conv) =>{
       },
     })
   );
-})
+});
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);
