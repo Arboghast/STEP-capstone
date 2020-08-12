@@ -60,8 +60,8 @@ export class Action {
         if (markName === "FIN") {
           let textContainer = document.getElementById("book-text");
           textContainer.removeChild(textContainer.lastChild);
-          this.scene.getText().showBookText();
           await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
+          this.scene.getText().showBookText();
         }
         if (markName ==='OK') {
           this.scene.getText().highlight();
