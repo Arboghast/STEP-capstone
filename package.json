@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/Arboghast/STEP-capstone#readme",
   "dependencies": {
+    "diff": "^4.0.2",
     "lumin": "^0.1.4",
     "mark.js": "^8.11.1"
   }

@@ -31,7 +31,7 @@ export class Action {
       },
       TEXT_FEEDBACK: async (data) => {
         this.scene.getText().hideBookText();
-        this.scene.getText().setText(data.matched);
+        this.scene.getText().setText(data.remaining);
       },
     };
     this.commands.WRITE_TO_LIBRARY.bind(this);
@@ -56,6 +56,7 @@ export class Action {
           // do nothing, when no command is sent or found
         }
       },
+      //Synchronize Assistant dialogue with text highlighting and page transition
       onTtsMark: async (markName) => {
         if (markName === "FIN") {
           let textContainer = document.getElementById("book-text");
@@ -63,10 +64,10 @@ export class Action {
           await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
           this.scene.getText().showBookText();
         }
-        if (markName ==='OK') {
+        if (markName ==='OK') { //begining of assistants speech
           this.scene.getText().highlight();
         }
-      },
+      }
     };
     callbacks.onUpdate.bind(this);
     // called by the Interactive Canvas web app once web app has loaded to

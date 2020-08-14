@@ -34,13 +34,13 @@
     text-decoration: underline;
 }
 
-.book img{
+.book img {
     height: auto;
     width: 100%;
 }
 
 /* Text Class Styling Below*/
-#book-text{
+#book-text {
     height: 80vh;
     margin: 10vh 0;
     padding: 0 10vw;
