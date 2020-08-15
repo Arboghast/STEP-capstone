@@ -10,6 +10,24 @@ const Diff = require("diff");
 // });
 
 const textData = require("./mockTextData.json");
+const rangesData = [
+  {
+    start: 0,
+    length: 0,
+    chars: 10,
+  },
+  {
+    start: 15,
+    length: 0,
+    chars: 20,
+  },
+  {
+    start: 50,
+    length: 0,
+    chars: 4,
+  },
+];
+const wordsData = ["the", "old", "slim", "grumpy", "slender", "please"];
 
 const app = conversation({ debug: true });
 
@@ -85,17 +103,24 @@ app.handle("analyseUserInput", (conv) => {
     );
   } else {
     let bookText = textData[bookTitle][conv.user.params[bookTitle]]; //assume its an array of sentences
-    let userInput = conv.session.params.userInput;//assume userInput is also an array of sentences
+    let userInput = conv.session.params.userInput; //assume userInput is also an array of sentences
 
-    let response = analyseText(bookText, userInput);
+    //bookText = splitBySentences(bookText);
+
+    //userInput = splitBySentences(userInput);
+
+    //let response = analyseText(bookText, userInput);
 
     if (response.assistantOutput != "") {
+      //TESTING
       conv.add(
         new Canvas({
           data: {
             command: "TEXT_FEEDBACK",
-            words: response.words,
-            ranges: response.ranges
+            words: wordsData,
+            ranges: rangesData,
+            //words: response.words,
+            //ranges: response.ranges
           },
         })
       );
@@ -103,7 +128,7 @@ app.handle("analyseUserInput", (conv) => {
       conv.add(ssml); //for onTtsMark callback
     } else {
       //audio feedback
-      //let ssml = `<speak></speak>`
+      let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`
       conv.user.params[bookTitle] += 1;
       chunkNumber = conv.user.params[bookTitle];
       if (chunkNumber >= textData[bookTitle].length) {
@@ -120,6 +145,8 @@ app.handle("analyseUserInput", (conv) => {
           },
         })
       );
+      conv.add(ssml);
+      conv.scene.next.name = "TEXT";
     }
   }
 });
@@ -249,7 +276,7 @@ function analyseText(bookParagraph, userParagraph) {
   let responseJSON = {
     ranges: sentenceRanges,
     words: wordsWrong,
-    assistantOutput: recompile
+    assistantOutput: recompile,
   };
 
   return responseJSON;
@@ -259,9 +286,6 @@ function analyseText(bookParagraph, userParagraph) {
 function findRange(str, index) {
   //replace important periods with a temp placeholder
   let chunk = splitBySentences(str);
-  for (let i = 0; i < chunk.length; i++) {
-    chunk[i] = chunk[i].replace(/\@/g, ".");
-  }
 
   //calculate the starting index of the given sentence by summing the length of all previous sentences.
   let startIndex = 0;
@@ -285,9 +309,18 @@ function stripPunctuation(str) {
 }
 
 function splitBySentences(str) {
-  return str
+  let split = str
     .replace(/(?<=(mr|Mr|Ms|md|Md|Dr|dr|mrs|Mrs|Sr|Jr|jr|sr))\./g, "@")
     .match(/[^.?!]+[.!?]+[\])'"`’”]*/g);
+
+  if (split == null) {
+    return [str];
+  } else {
+    for (let i = 0; i < split.length; i++) {
+      split[i] = split[i].replace(/\@/g, ".");
+    }
+    return split;
+  }
 }
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);
