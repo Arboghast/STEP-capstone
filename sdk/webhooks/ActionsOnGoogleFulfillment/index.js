@@ -49,31 +49,26 @@ app.handle("welcome", (conv) => {
 });
 
 app.handle("fallback", (conv) => {
-  conv.add(`I don't understand. You can read a book or cancel.`);
+  conv.add(`I don't understand, please repeat yourself.`);
   conv.add(new Canvas());
 });
 
 app.handle("bookSelected", (conv) => {
-  const bookTitle = conv.session.params.bookTitle; //cannot be null
+  //Selection of a book from the library scene
+  const bookTitle = conv.session.params.bookTitle; //user input
 
-  let chunkNumber;
-  if (conv.user.params[bookTitle] != undefined) {
-    chunkNumber = conv.user.params[bookTitle];
-  } else {
-    chunkNumber = 0;
-    conv.user.params[bookTitle] = 0;
+  if (conv.user.params[bookTitle] == undefined) {
+    //define key value pair if it doesnt exist
+    conv.user.params[bookTitle] = {
+      chunk: 0,
+      size: textData[bookTitle].length,
+    };
   }
 
   conv.user.params.currentBook = bookTitle;
 
+  let text = getText(textData, conv);
   conv.add("Loading Book...");
-  let text;
-  if (chunkNumber >= textData[bookTitle].length) {
-    text = "The End.";
-    conv.add("You can say Restart Book or Go Back To The Library.");
-  } else {
-    text = textData[bookTitle][chunkNumber];
-  }
   conv.add(
     new Canvas({
       data: {
@@ -87,12 +82,37 @@ app.handle("bookSelected", (conv) => {
 app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
 
-  //In case user says something during the End of Book Screen.
-  let chunkNumber = conv.user.params[bookTitle];
-  let text;
-  if (chunkNumber >= textData[bookTitle].length) {
-    text = "The End.";
-    conv.add("You can say Restart Book or Go Back To The Library.");
+  let bookText = textData[bookTitle][conv.user.params[bookTitle]["chunk"]]; //assume its an array of sentences
+  let userInput = conv.session.params.userInput; //assume userInput is also an array of sentences
+
+  //bookText = splitBySentences(bookText);
+
+  //userInput = splitBySentences(userInput);
+
+  //let response = analyseText(bookText, userInput);
+
+  if (response.assistantOutput != "") {
+    //TESTING
+    conv.add(
+      new Canvas({
+        data: {
+          command: "TEXT_FEEDBACK",
+          words: wordsData,
+          ranges: rangesData,
+          //words: response.words,
+          //ranges: response.ranges
+        },
+      })
+    );
+    let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
+    conv.add(ssml); //for onTtsMark callback
+  } else {
+    //audio feedback
+    let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`;
+
+    //go next logic
+    conv.user.params[bookTitle]["chunk"] += 1;
+    let text = getText(textData, conv);
     conv.add(
       new Canvas({
         data: {
@@ -101,57 +121,12 @@ app.handle("analyseUserInput", (conv) => {
         },
       })
     );
-  } else {
-    let bookText = textData[bookTitle][conv.user.params[bookTitle]]; //assume its an array of sentences
-    let userInput = conv.session.params.userInput; //assume userInput is also an array of sentences
-
-    //bookText = splitBySentences(bookText);
-
-    //userInput = splitBySentences(userInput);
-
-    //let response = analyseText(bookText, userInput);
-
-    if (response.assistantOutput != "") {
-      //TESTING
-      conv.add(
-        new Canvas({
-          data: {
-            command: "TEXT_FEEDBACK",
-            words: wordsData,
-            ranges: rangesData,
-            //words: response.words,
-            //ranges: response.ranges
-          },
-        })
-      );
-      let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
-      conv.add(ssml); //for onTtsMark callback
-    } else {
-      //audio feedback
-      let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`
-      conv.user.params[bookTitle] += 1;
-      chunkNumber = conv.user.params[bookTitle];
-      if (chunkNumber >= textData[bookTitle].length) {
-        text = "The End.";
-        conv.add("You can say Restart Book or Go Back To The Library.");
-      } else {
-        text = textData[bookTitle][chunkNumber];
-      }
-      conv.add(
-        new Canvas({
-          data: {
-            command: "CHANGE_TEXT",
-            text: text,
-          },
-        })
-      );
-      conv.add(ssml);
-      conv.scene.next.name = "TEXT";
-    }
+    conv.add(ssml);
   }
 });
 
 app.handle("openLibrary", (conv) => {
+  //scene progression handled by AOG GOTO_LIBRARY intent
   conv.user.params.currentBook = null;
   conv.add(
     new Canvas({
@@ -163,16 +138,11 @@ app.handle("openLibrary", (conv) => {
 });
 
 app.handle("nextChunk", (conv) => {
+  //scene progression handled by AOG NEXT intent
   const bookTitle = conv.user.params.currentBook;
-  conv.user.params[bookTitle] += 1;
-  let chunkNumber = conv.user.params[bookTitle];
-  let text;
-  if (chunkNumber >= textData[bookTitle].length) {
-    text = "The End.";
-    conv.add("You can say Restart Book or Go Back To The Library.");
-  } else {
-    text = textData[bookTitle][chunkNumber];
-  }
+  conv.user.params[bookTitle]["chunk"] += 1; //increment page
+
+  let text = getText(textData, conv); //send appropriate response based on user's position in the book
   conv.add(
     new Canvas({
       data: {
@@ -185,17 +155,35 @@ app.handle("nextChunk", (conv) => {
 
 app.handle("restartBook", (conv) => {
   const bookTitle = conv.user.params.currentBook;
-  conv.user.params[bookTitle] = 0;
-  let chunkNumber = 0;
+  conv.user.params[bookTitle]["chunk"] = 0; //setting the chunk number to 0
+  conv.scene.next.name = "TEXT";
+
   conv.add(
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: textData[bookTitle][chunkNumber],
+        text: textData[bookTitle][0],
       },
     })
   );
 });
+
+function getText(textData, conv) {
+  let bookTitle = conv.user.params.currentBook;
+  let { chunk, size } = conv.user.params[bookTitle];
+
+  let text;
+  if (chunk >= size) {
+    text = "The End.";
+    conv.add(
+      "You can Reread this book or Go Back To The Library to find a new book."
+    );
+    conv.scene.next.name = "FINISH";
+  } else {
+    text = textData[bookTitle][chunk];
+  }
+  return text;
+}
 
 //assumes book paragraph and userParagraph are arrays of sentences
 function analyseText(bookParagraph, userParagraph) {
