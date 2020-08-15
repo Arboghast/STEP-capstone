@@ -46,6 +46,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.text {
+  height: 50%;
+  margin-top: 50%;
+}
+
 .red-highlight {
   color: red;
 }

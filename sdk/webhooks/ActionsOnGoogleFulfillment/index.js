@@ -57,7 +57,7 @@ app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
   const bookTitle = conv.session.params.bookTitle; //user input
 
-  if (conv.user.params[bookTitle] == undefined) {
+  if (conv.user.params[bookTitle]["chunk"] == undefined) {
     //define key value pair if it doesnt exist
     conv.user.params[bookTitle] = {
       chunk: 0,
@@ -67,7 +67,7 @@ app.handle("bookSelected", (conv) => {
 
   conv.user.params.currentBook = bookTitle;
 
-  let text = getText(textData, conv);
+  let text = getText(conv);
   conv.add("Loading Book...");
   conv.add(
     new Canvas({
@@ -90,6 +90,7 @@ app.handle("analyseUserInput", (conv) => {
   //userInput = splitBySentences(userInput);
 
   //let response = analyseText(bookText, userInput);
+  let response = { assistantOutput: "testing" };
 
   if (response.assistantOutput != "") {
     //TESTING
@@ -112,7 +113,7 @@ app.handle("analyseUserInput", (conv) => {
 
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
-    let text = getText(textData, conv);
+    let text = getText(conv);
     conv.add(
       new Canvas({
         data: {
@@ -142,7 +143,7 @@ app.handle("nextChunk", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   conv.user.params[bookTitle]["chunk"] += 1; //increment page
 
-  let text = getText(textData, conv); //send appropriate response based on user's position in the book
+  let text = getText(conv); //send appropriate response based on user's position in the book
   conv.add(
     new Canvas({
       data: {
@@ -168,8 +169,9 @@ app.handle("restartBook", (conv) => {
   );
 });
 
-function getText(textData, conv) {
+function getText(conv) {
   let bookTitle = conv.user.params.currentBook;
+  console.log(conv.user.params);
   let { chunk, size } = conv.user.params[bookTitle];
 
   let text;
