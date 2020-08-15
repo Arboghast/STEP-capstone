@@ -9,12 +9,13 @@ export class Text {
   index = 0;
   ranges;
   words;
-  instance = new Mark(textContainer);
+  instance;
 
   constructor() {
     this.text.classList.add("text");
     this.textContainer.classList.add("text-container");
     this.textContainer.appendChild(this.text);
+    this.instance = new Mark(this.textContainer);
   }
 
   setText(newText) {
