@@ -270,7 +270,7 @@ function findRange(str, index) {
   }
   let length = chunk[index].length;
 
-  let ans = { start: startIndex, length: length };
+  let ans = { start: startIndex, length: 0, chars: length };
   return ans;
 }
 

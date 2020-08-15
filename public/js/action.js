@@ -30,8 +30,8 @@ export class Action {
         this.scene.openLibrary();
       },
       TEXT_FEEDBACK: async (data) => {
-        this.scene.getText().hideBookText();
-        this.scene.getText().setText(data.remaining);
+        this.scene.getText().setRanges(data.ranges);
+        this.scene.getText().setWords(data.words);
       },
     };
     this.commands.WRITE_TO_LIBRARY.bind(this);
@@ -59,10 +59,8 @@ export class Action {
       //Synchronize Assistant dialogue with text highlighting and page transition
       onTtsMark: async (markName) => {
         if (markName === "FIN") {
-          let textContainer = document.getElementById("book-text");
-          textContainer.removeChild(textContainer.lastChild);
+          this.scene.getText().clearHighlights();
           await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
-          this.scene.getText().showBookText();
         }
         if (markName ==='OK') { //begining of assistants speech
           this.scene.getText().highlight();
