@@ -63,7 +63,7 @@ export class Action {
           await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
         }
         if (markName ==='OK') { //begining of assistants speech
-          this.scene.getText().highlight();
+          this.scene.getText().startHighlighting();
         }
       }
     };
