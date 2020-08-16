@@ -6,7 +6,7 @@ export class Text {
   textContainer = document.createElement("div");
   text = document.createElement("p");
   interval;
-  index = 0;
+  index;
   ranges;
   words;
   instance;

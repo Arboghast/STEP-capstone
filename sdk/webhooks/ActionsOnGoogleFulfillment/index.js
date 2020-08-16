@@ -305,7 +305,7 @@ function splitBySentences(str) {
     }
     return split;
   } else {
-    return str;
+    return [str];
   }
 }
 
