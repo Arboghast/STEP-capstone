@@ -1,0 +1,21 @@
+conditionalEvents:
+- condition: scene.slots.status == "FINAL"
+  handler:
+    webhookHandler: analyseUserInput
+  transitionToScene: TEXT
+intentEvents:
+- handler:
+    webhookHandler: openLibrary
+  intent: GOTO_LIBRARY
+  transitionToScene: LIBRARY
+- handler:
+    webhookHandler: nextChunk
+  intent: NEXT
+  transitionToScene: TEXT
+slots:
+- commitBehavior:
+    writeSessionParam: userInput
+  name: userInput
+  required: true
+  type:
+    name: Input

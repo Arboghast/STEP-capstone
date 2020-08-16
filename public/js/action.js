@@ -1,20 +1,4 @@
 /**
- * Copyright 2020 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * This class is used as a wrapper for Google Assistant Canvas Action class
  * along with its callbacks.
  */
@@ -26,22 +10,35 @@ export class Action {
     this.canvas = window.interactiveCanvas;
     this.scene = scene;
     this.commands = {
-      TINT: (data) => {
-        this.scene.sprite.tint = data.tint;
+      WRITE_TO_LIBRARY: (data) => {
+        //loop through the data-json
+        //Dynamically create Book(title,src) objects and append it
+        //to the library container
       },
-      SPIN: (data) => {
-        this.scene.sprite.spin = data.spin;
+      BOOK_SELECTED: (data) => {
+        this.scene.getText().setText(data.text);
+        this.scene.openText();
+        //Parse the data-json
+        //create a Text() object and display it on the screen
       },
-      RESTART_GAME: (data) => {
-        this.scene.button.texture = this.scene.button.textureButton;
-        this.scene.sprite.spin = true;
-        this.scene.sprite.tint = 0x00FF00; // green
-        this.scene.sprite.rotation = 0;
+      CHANGE_TEXT: (data) => {
+        //send the api the index we are on, if ommited, assume 0,
+        //keep counter on the frontend to track current index;
+        this.scene.getText().setText(data.text);
+      },
+      OPEN_LIBRARY: (data) => {
+        this.scene.openLibrary();
+      },
+      TEXT_FEEDBACK: async (data) => {
+        this.scene.getText().setRanges(data.ranges);
+        this.scene.getText().setWords(data.words);
       },
     };
-    this.commands.TINT.bind(this);
-    this.commands.SPIN.bind(this);
-    this.commands.RESTART_GAME.bind(this);
+    this.commands.WRITE_TO_LIBRARY.bind(this);
+    this.commands.BOOK_SELECTED.bind(this);
+    this.commands.CHANGE_TEXT.bind(this);
+    this.commands.OPEN_LIBRARY.bind(this);
+    this.commands.TEXT_FEEDBACK.bind(this);
   }
 
   /**
@@ -59,6 +56,16 @@ export class Action {
           // do nothing, when no command is sent or found
         }
       },
+      //Synchronize Assistant dialogue with text highlighting and page transition
+      onTtsMark: async (markName) => {
+        if (markName === "FIN") {
+          this.scene.getText().clearHighlights();
+          await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
+        }
+        if (markName ==='OK') { //begining of assistants speech
+          this.scene.getText().startHighlighting();
+        }
+      }
     };
     callbacks.onUpdate.bind(this);
     // called by the Interactive Canvas web app once web app has loaded to
