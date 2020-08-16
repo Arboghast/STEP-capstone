@@ -33,7 +33,7 @@ export class Text {
 
   startHighlighting() {
     this.interval = setInterval(() => {
-        if(this.ranges[this.index].length > this.ranges[this.index].chars)
+        if(this.ranges[this.index]["length"] > this.ranges[this.index]["chars"])
         {
           this.index++;
           if(this.index >= this.ranges.length)
@@ -42,7 +42,7 @@ export class Text {
           }
         }
         else{
-          this.ranges[this.index].length += 1;
+          this.ranges[this.index]["length"] += 1;
           this.highlight();
         }
       }, 50);

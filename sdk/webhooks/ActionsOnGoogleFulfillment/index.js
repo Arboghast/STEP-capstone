@@ -81,16 +81,13 @@ app.handle("bookSelected", (conv) => {
 
 app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
+  const chunk = conv.user.params[bookTitle]["chunk"];
 
-  let bookText = textData[bookTitle][conv.user.params[bookTitle]["chunk"]]; //assume its an array of sentences
-  let userInput = conv.session.params.userInput; //assume userInput is also an array of sentences
+  let bookText = splitBySentences(textData[bookTitle][chunk]); //assume its an array of sentences
+  let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
 
-  //bookText = splitBySentences(bookText);
-
-  //userInput = splitBySentences(userInput);
-
-  //let response = analyseText(bookText, userInput);
-  let response = { assistantOutput: "testing" };
+  let response = analyseText(bookText, userInput);
+  //let response = { assistantOutput: "testing" };
 
   if (response.assistantOutput != "") {
     //TESTING
@@ -98,19 +95,19 @@ app.handle("analyseUserInput", (conv) => {
       new Canvas({
         data: {
           command: "TEXT_FEEDBACK",
-          words: wordsData,
-          ranges: rangesData,
-          //words: response.words,
-          //ranges: response.ranges
+          // words: wordsData,
+          // ranges: rangesData,
+          // input: userInput,
+          // book: bookText,
+          // analysis: res
+          words: response.words,
+          ranges: response.ranges
         },
       })
     );
     let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
-    conv.add(ssml); //for onTtsMark callback
+    conv.add(ssml);
   } else {
-    //audio feedback
-    let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`;
-
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     let text = getText(conv);
@@ -122,6 +119,8 @@ app.handle("analyseUserInput", (conv) => {
         },
       })
     );
+    //audio feedback
+    let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`;
     conv.add(ssml);
   }
 });
@@ -236,23 +235,23 @@ function analyseText(bookParagraph, userParagraph) {
     }
   }
 
-  //condenses book paragraph into one string
+  let sentenceRanges = [];
+  for (let i = 0; i < sentencesWrong.length; i++) {
+    let ans = findRange(bookParagraph, sentencesWrong[i]);
+    sentenceRanges.push(ans);
+  }
+
+  //condenses book paragraph into one string, to easily index the paragraph
   let bookCollapsed = "";
   for (let i = 0; i < bookParagraph.length; i++) {
     bookCollapsed += bookParagraph[i];
-  }
-
-  let sentenceRanges = [];
-  for (let i = 0; i < sentencesWrong.length; i++) {
-    let ans = findRange(bookCollapsed, sentencesWrong[i]);
-    sentenceRanges.push(ans);
   }
 
   //combine wrong sentences into one string so the assistant can read it
   let recompile = "";
   for (let x = 0; x < sentenceRanges.length; x++) {
     let ans = sentenceRanges[x];
-    for (let k = ans.start; k < ans.start + ans.length; k++) {
+    for (let k = ans.start; k < ans.start + ans.chars; k++) {
       recompile += bookCollapsed.charAt(k);
     }
   }
@@ -273,16 +272,13 @@ function analyseText(bookParagraph, userParagraph) {
 }
 
 //given a paragraph, and a sentence number(index), return the starting index of the sentence and its length
-function findRange(str, index) {
-  //replace important periods with a temp placeholder
-  let chunk = splitBySentences(str);
-
+function findRange(para, index) {
   //calculate the starting index of the given sentence by summing the length of all previous sentences.
   let startIndex = 0;
   for (let j = index - 1; j >= 0; j--) {
-    startIndex += chunk[j].length;
+    startIndex += para[j].length;
   }
-  let length = chunk[index].length;
+  let length = para[index].length;
 
   let ans = { start: startIndex, length: 0, chars: length };
   return ans;
@@ -299,17 +295,17 @@ function stripPunctuation(str) {
 }
 
 function splitBySentences(str) {
-  let split = str
-    .replace(/(?<=(mr|Mr|Ms|md|Md|Dr|dr|mrs|Mrs|Sr|Jr|jr|sr))\./g, "@")
-    .match(/[^.?!]+[.!?]+[\])'"`’”]*/g);
+  if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) { //prevent null return on .match() call
+    let split = str
+      .replace(/(?<=(mr|Mr|Ms|md|Md|Dr|dr|mrs|Mrs|Sr|Jr|jr|sr))\./g, "@")
+      .match(/[^.?!]+[.!?]+[\])'"`’”]*/g);
 
-  if (split == null) {
-    return [str];
-  } else {
     for (let i = 0; i < split.length; i++) {
       split[i] = split[i].replace(/\@/g, ".");
     }
     return split;
+  } else {
+    return str;
   }
 }
 
