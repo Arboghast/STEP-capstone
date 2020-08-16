@@ -120,8 +120,7 @@ app.handle("analyseUserInput", (conv) => {
     );
     //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
     let ssml = `<speak>
-      <audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg>
-      filler text
+      <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
       </audio>
     </speak>`;
     
