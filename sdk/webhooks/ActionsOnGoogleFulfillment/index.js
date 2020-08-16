@@ -90,7 +90,6 @@ app.handle("analyseUserInput", (conv) => {
   //let response = { assistantOutput: "testing" };
 
   if (response.assistantOutput != "") {
-    //TESTING
     conv.add(
       new Canvas({
         data: {
@@ -119,8 +118,13 @@ app.handle("analyseUserInput", (conv) => {
         },
       })
     );
-    //audio feedback
-    let ssml = `<speak><audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg></audio></speak>`;
+    //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
+    let ssml = `<speak>
+      <audio src=https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg>
+      filler text
+      </audio>
+    </speak>`;
+    
     conv.add(ssml);
   }
 });
