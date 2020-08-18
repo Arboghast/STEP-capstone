@@ -1,33 +1,48 @@
 const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+var admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
+//const {apiKey} = require("./APIKey.json");
 const Diff = require("diff");
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: "https://reading-dc6dd.firebaseio.com",
+
+  // Set the configuration for your app
+  // TODO: Replace with your project's config object
+  // var config = {
+  //   apiKey: apiKey,
+  //   authDomain: "reading-dc6dd.firebaseapp.com",
+  //   databaseURL: "https://reading-dc6dd.firebaseio.com",
+  //   storageBucket: "bucket.appspot.com"
+  // };
+  // firebase.initializeApp(config);
+
+  // // Get a reference to the database service
+  // var database = firebase.database();
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://reading-dc6dd.firebaseio.com",
+});
+
+var db = admin.database();
+var rootRef = db.ref();
+
+let database;
+
+//consider moving into the welcome intent
+rootRef.once('value', function(snapshot){
+    database = snapshot.val();
+})
+
+// setTimeout(() => {console.log("done loading database");console.log(database)},1500);
+// rootRef.on("value", function(snapshot) {
+//    console.log(snapshot.val());
+//    database = snapshot.val();
+// }, function (error) {
+//    console.log("Error: " + error.code);
 // });
 
-const textData = require("./mockTextData.json");
-const rangesData = [
-  {
-    start: 0,
-    length: 0,
-    chars: 10,
-  },
-  {
-    start: 15,
-    length: 0,
-    chars: 20,
-  },
-  {
-    start: 50,
-    length: 0,
-    chars: 4,
-  },
-];
-const wordsData = ["the", "old", "slim", "grumpy", "slender", "please"];
+//const textData = require("./mockTextData.json");
 
 const app = conversation({ debug: true });
 
@@ -57,11 +72,11 @@ app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
   const bookTitle = conv.session.params.bookTitle; //user input
 
-  if (conv.user.params[bookTitle]["chunk"] == undefined) {
+  if (conv.user.params[bookTitle] == undefined || conv.user.params[bookTitle]["chunk"] == undefined) {
     //define key value pair if it doesnt exist
     conv.user.params[bookTitle] = {
       chunk: 0,
-      size: textData[bookTitle].length,
+      size: database[bookTitle]["Text"].length,
     };
   }
 
@@ -83,7 +98,7 @@ app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   const chunk = conv.user.params[bookTitle]["chunk"];
 
-  let bookText = splitBySentences(textData[bookTitle][chunk]); //assume its an array of sentences
+  let bookText = splitBySentences(database[bookTitle]["Text"][chunk]); //assume its an array of sentences
   let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
 
   let response = analyseText(bookText, userInput);
@@ -165,7 +180,7 @@ app.handle("restartBook", (conv) => {
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: textData[bookTitle][0],
+        text: database[bookTitle]["Text"][0],
       },
     })
   );
@@ -173,7 +188,6 @@ app.handle("restartBook", (conv) => {
 
 function getText(conv) {
   let bookTitle = conv.user.params.currentBook;
-  console.log(conv.user.params);
   let { chunk, size } = conv.user.params[bookTitle];
 
   let text;
@@ -184,7 +198,7 @@ function getText(conv) {
     );
     conv.scene.next.name = "FINISH";
   } else {
-    text = textData[bookTitle][chunk];
+    text = database[bookTitle]["Text"][chunk];
   }
   return text;
 }
