@@ -1,33 +1,18 @@
 const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+var admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
 const Diff = require("diff");
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: "https://reading-dc6dd.firebaseio.com",
-// });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://reading-dc6dd.firebaseio.com",
+});
 
-const textData = require("./mockTextData.json");
-const rangesData = [
-  {
-    start: 0,
-    length: 0,
-    chars: 10,
-  },
-  {
-    start: 15,
-    length: 0,
-    chars: 20,
-  },
-  {
-    start: 50,
-    length: 0,
-    chars: 4,
-  },
-];
-const wordsData = ["the", "old", "slim", "grumpy", "slender", "please"];
+var db = admin.database();
+var rootRef = db.ref();
+
+let database;
 
 const app = conversation({ debug: true });
 
@@ -46,6 +31,30 @@ app.handle("welcome", (conv) => {
       url: "https://reading-dc6dd.web.app",
     })
   );
+
+  //Load library
+  rootRef
+    .once("value")
+    .then((snapshot) => {
+      database = snapshot.val();
+      let books = [];
+      for (key in Object.keys(database)) {
+        let imgSrc = database[key]["Image"];
+        let title = key;
+        let book = { imgSrc, title };
+        books.push(book);
+      }
+
+      conv.add(
+        new Canvas({
+          data: {
+            command: "WRITE_TO_LIBRARY",
+            books: books,
+          },
+        })
+      );
+    })
+    .catch((err) => console.log(err));
 });
 
 app.handle("fallback", (conv) => {
@@ -55,13 +64,16 @@ app.handle("fallback", (conv) => {
 
 app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
-  const bookTitle = conv.session.params.bookTitle; //user input
+  const bookTitle = toTitleCase(conv.session.params.bookTitle); //user input
 
-  if (conv.user.params[bookTitle]["chunk"] == undefined) {
+  if (
+    conv.user.params[bookTitle] == undefined ||
+    conv.user.params[bookTitle]["chunk"] == undefined
+  ) {
     //define key value pair if it doesnt exist
     conv.user.params[bookTitle] = {
       chunk: 0,
-      size: textData[bookTitle].length,
+      size: database[bookTitle]["Text"].length,
     };
   }
 
@@ -77,36 +89,34 @@ app.handle("bookSelected", (conv) => {
       },
     })
   );
+
+  checkForchapter(conv,text);
+
 });
 
 app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   const chunk = conv.user.params[bookTitle]["chunk"];
 
-  let bookText = splitBySentences(textData[bookTitle][chunk]); //assume its an array of sentences
-  let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
+  let bookText = database[bookTitle]["Text"][chunk]; //An Array of Sentences
+  let userInput = splitIntoSentences(conv.session.params.userInput); //split by puncuation
 
   let response = analyseText(bookText, userInput);
-  //let response = { assistantOutput: "testing" };
 
   if (response.assistantOutput != "") {
     conv.add(
       new Canvas({
         data: {
           command: "TEXT_FEEDBACK",
-          // words: wordsData,
-          // ranges: rangesData,
-          // input: userInput,
-          // book: bookText,
-          // analysis: res
           words: response.words,
-          ranges: response.ranges
+          ranges: response.ranges,
         },
       })
     );
     let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
     conv.add(ssml);
   } else {
+
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     let text = getText(conv);
@@ -118,12 +128,12 @@ app.handle("analyseUserInput", (conv) => {
         },
       })
     );
+
     //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
     let ssml = `<speak>
-      <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
-      </audio>
-    </speak>`;
-    
+        <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
+        </audio>
+      </speak>`;
     conv.add(ssml);
   }
 });
@@ -154,6 +164,8 @@ app.handle("nextChunk", (conv) => {
       },
     })
   );
+
+  checkForchapter(conv,text);
 });
 
 app.handle("restartBook", (conv) => {
@@ -161,22 +173,24 @@ app.handle("restartBook", (conv) => {
   conv.user.params[bookTitle]["chunk"] = 0; //setting the chunk number to 0
   conv.scene.next.name = "TEXT";
 
+  let text = getText(conv);
   conv.add(
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: textData[bookTitle][0],
+        text: text,
       },
     })
   );
+
+  checkForchapter(conv, text);
 });
 
 function getText(conv) {
   let bookTitle = conv.user.params.currentBook;
-  console.log(conv.user.params);
   let { chunk, size } = conv.user.params[bookTitle];
 
-  let text;
+  let text = "";
   if (chunk >= size) {
     text = "The End.";
     conv.add(
@@ -184,9 +198,19 @@ function getText(conv) {
     );
     conv.scene.next.name = "FINISH";
   } else {
-    text = textData[bookTitle][chunk];
+    let temp = database[bookTitle]["Text"][chunk];
+    for(let i = 0; i < temp.length; i++)
+    {
+      text = text + temp[i] + " ";
+    }
   }
   return text;
+}
+
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
 }
 
 //assumes book paragraph and userParagraph are arrays of sentences
@@ -294,11 +318,12 @@ function removeMarks(str) {
 }
 
 function stripPunctuation(str) {
-  return str.replace(/[,\/#!$%\^&\*;:'{}=\_`~()]/g, "").replace(/-/g, " ");
+  return str.replace(/[,\/#!$%\^&\*;:'"{}=\_`~()]/g, "").replace(/-/g, " ");
 }
 
-function splitBySentences(str) {
-  if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) { //prevent null return on .match() call
+function splitIntoSentences(str) {
+  if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) {
+    //prevent null return on .match() call
     let split = str
       .replace(/(?<=(mr|Mr|Ms|md|Md|Dr|dr|mrs|Mrs|Sr|Jr|jr|sr))\./g, "@")
       .match(/[^.?!]+[.!?]+[\])'"`’”]*/g);
@@ -309,6 +334,16 @@ function splitBySentences(str) {
     return split;
   } else {
     return [str];
+  }
+}
+
+function checkForchapter(conv, text){
+  const bookTitle = conv.user.params.currentBook;
+  if(/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) //if this chunk is a new chapter
+  {
+    conv.user.params[bookTitle]["chunk"] += 1;
+    let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
+    conv.add(ssml);
   }
 }
 

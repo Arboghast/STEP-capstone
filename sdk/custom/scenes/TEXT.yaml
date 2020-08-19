@@ -5,6 +5,10 @@ conditionalEvents:
   transitionToScene: TEXT
 intentEvents:
 - handler:
+    webhookHandler: restartBook
+  intent: RESTART
+  transitionToScene: TEXT
+- handler:
     webhookHandler: openLibrary
   intent: GOTO_LIBRARY
   transitionToScene: LIBRARY

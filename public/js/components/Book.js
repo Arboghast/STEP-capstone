@@ -37,7 +37,7 @@ export class Book{
         return this.title;
     }
 
-    getbook(){
+    getBook(){
         return this.bookContainer;
     }
 }
