@@ -90,8 +90,13 @@ app.handle("bookSelected", (conv) => {
     })
   );
 
-  let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
-  conv.add(ssml);
+  if(conv.user.params[bookTitle]["chunk"] == 0)
+  {
+    conv.user.params[bookTitle]["chunk"] += 1;
+    let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
+    conv.add(ssml);
+  }
+
 });
 
 app.handle("analyseUserInput", (conv) => {
@@ -317,7 +322,7 @@ function removeMarks(str) {
 }
 
 function stripPunctuation(str) {
-  return str.replace(/[,\/#!$%\^&\*;:'{}=\_`~()]/g, "").replace(/-/g, " ");
+  return str.replace(/[,\/#!$%\^&\*;:'"{}=\_`~()]/g, "").replace(/-/g, " ");
 }
 
 function splitBySentences(str) {
