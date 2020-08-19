@@ -11,19 +11,14 @@ export class Action {
     this.scene = scene;
     this.commands = {
       WRITE_TO_LIBRARY: (data) => {
-        //loop through the data-json
-        //Dynamically create Book(title,src) objects and append it
-        //to the library container
+        this.scene.getLibrary().clearLibrary();
+        this.scene.getLibrary().addToLibrary(data.books);
       },
       BOOK_SELECTED: (data) => {
         this.scene.getText().setText(data.text);
         this.scene.openText();
-        //Parse the data-json
-        //create a Text() object and display it on the screen
       },
       CHANGE_TEXT: (data) => {
-        //send the api the index we are on, if ommited, assume 0,
-        //keep counter on the frontend to track current index;
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {

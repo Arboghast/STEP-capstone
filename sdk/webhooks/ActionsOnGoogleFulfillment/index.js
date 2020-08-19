@@ -61,6 +61,25 @@ app.handle("welcome", (conv) => {
       url: "https://reading-dc6dd.web.app",
     })
   );
+
+  //Load library
+  let books = [];
+  for(key in Object.keys(database))
+  {
+    let imgSrc = database[key]["Image"];
+    let title = key;
+    let book = {imgSrc, title};
+    books.push(book);
+  }
+
+  conv.add(
+    new Canvas({
+      data: {
+        command: "WRITE_TO_LIBRARY",
+        books: books
+      },
+    })
+  );
 });
 
 app.handle("fallback", (conv) => {
@@ -70,7 +89,7 @@ app.handle("fallback", (conv) => {
 
 app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
-  const bookTitle = conv.session.params.bookTitle; //user input
+  const bookTitle = toTitleCase(conv.session.params.bookTitle); //user input
 
   if (conv.user.params[bookTitle] == undefined || conv.user.params[bookTitle]["chunk"] == undefined) {
     //define key value pair if it doesnt exist
@@ -201,6 +220,15 @@ function getText(conv) {
     text = database[bookTitle]["Text"][chunk];
   }
   return text;
+}
+
+function toTitleCase(str) {
+  return str.replace(
+      /\w\S*/g,
+      function(txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      }
+  );
 }
 
 //assumes book paragraph and userParagraph are arrays of sentences
