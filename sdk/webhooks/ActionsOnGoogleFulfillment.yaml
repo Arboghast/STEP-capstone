@@ -6,5 +6,7 @@ handlers:
 - name: nextChunk
 - name: restartBook
 - name: openLibrary
-inlineCloudFunction:
-  executeFunction: ActionsOnGoogleFulfillment
+httpsEndpoint:
+  baseUrl: https://us-central1-reading-dc6dd.cloudfunctions.net/ActionsOnGoogleFulfillment
+#inlineCloudFunction:
+#  executeFunction: ActionsOnGoogleFulfillment

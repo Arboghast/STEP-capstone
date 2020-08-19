@@ -1,18 +1,18 @@
 const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
-var admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
+// var admin = require("firebase-admin");
+// const serviceAccount = require("./serviceAccountKey.json");
 const Diff = require("diff");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://reading-dc6dd.firebaseio.com",
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://reading-dc6dd.firebaseio.com",
+// });
 
-var db = admin.database();
-var rootRef = db.ref();
+// var db = admin.database();
+// var rootRef = db.ref();
 
-let database;
+const database = require("./reformatted4.json");
 
 const app = conversation({ debug: true });
 
@@ -33,28 +33,45 @@ app.handle("welcome", (conv) => {
   );
 
   //Load library
-  rootRef
-    .once("value")
-    .then((snapshot) => {
-      database = snapshot.val();
-      let books = [];
-      for (key in Object.keys(database)) {
-        let imgSrc = database[key]["Image"];
-        let title = key;
-        let book = { imgSrc, title };
-        books.push(book);
-      }
+  // rootRef
+  //   .once("value")
+  //   .then((snapshot) => {
+  //     database = snapshot.val();
+  //     let books = [];
+  //     for (key in Object.keys(database)) {
+  //       let imgSrc = database[key]["Image"];
+  //       let title = key;
+  //       let book = { imgSrc, title };
+  //       books.push(book);
+  //     }
 
-      conv.add(
-        new Canvas({
-          data: {
-            command: "WRITE_TO_LIBRARY",
-            books: books,
-          },
-        })
-      );
-    })
-    .catch((err) => console.log(err));
+  //     conv.add(
+  //       new Canvas({
+  //         data: {
+  //           command: "WRITE_TO_LIBRARY",
+  //           books: books,
+  //         },
+  //       })
+  //     );
+  //   })
+  //   .catch((err) => console.log(err));
+
+    // let books = [];
+    //   for (key in Object.keys(database)) {
+    //     let imgSrc = database[key]["Image"];
+    //     let title = key;
+    //     let book = { imgSrc, title };
+    //     books.push(book);
+    //   }
+
+    //   conv.add(
+    //     new Canvas({
+    //       data: {
+    //         command: "WRITE_TO_LIBRARY",
+    //         books: books,
+    //       },
+    //     })
+    //   );
 });
 
 app.handle("fallback", (conv) => {
