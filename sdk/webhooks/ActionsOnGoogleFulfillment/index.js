@@ -173,16 +173,17 @@ app.handle("restartBook", (conv) => {
   conv.user.params[bookTitle]["chunk"] = 0; //setting the chunk number to 0
   conv.scene.next.name = "TEXT";
 
+  let text = getText(conv);
   conv.add(
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: database[bookTitle]["Text"][0],
+        text: text,
       },
     })
   );
 
-  checkForchapter(conv, database[bookTitle]["Text"][0]);
+  checkForchapter(conv, text);
 });
 
 function getText(conv) {
@@ -338,21 +339,7 @@ function splitIntoSentences(str) {
 
 function checkForchapter(conv, text){
   const bookTitle = conv.user.params.currentBook;
-  if(/^CHAPTER/gi.test(text)) //if this chunk is a new chapter
-  {
-    conv.user.params[bookTitle]["chunk"] += 1;
-    let spl = text.split(/\r\n/gi);
-
-    let ssml = `<speak>`;
-    for(let i = 0; i < spl.length-1; i++)
-    {
-      ssml += spl[i] + '<break time="500ms"/>';
-    }
-    ssml += spl[spl.length-1];
-    ssml += '<mark name="FIN"/></speak>';
-    conv.add(ssml);
-  }
-  else if(conv.user.params[bookTitle]["chunk"] == 0) //if this chunk is a title
+  if(/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) //if this chunk is a new chapter
   {
     conv.user.params[bookTitle]["chunk"] += 1;
     let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
