@@ -2,21 +2,7 @@ const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
 var admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
-//const {apiKey} = require("./APIKey.json");
 const Diff = require("diff");
-
-// Set the configuration for your app
-// TODO: Replace with your project's config object
-// var config = {
-//   apiKey: apiKey,
-//   authDomain: "reading-dc6dd.firebaseapp.com",
-//   databaseURL: "https://reading-dc6dd.firebaseio.com",
-//   storageBucket: "bucket.appspot.com"
-// };
-// firebase.initializeApp(config);
-
-// // Get a reference to the database service
-// var database = firebase.database();
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -27,21 +13,6 @@ var db = admin.database();
 var rootRef = db.ref();
 
 let database;
-
-//consider moving into the welcome intent
-rootRef.once("value", function (snapshot) {
-  database = snapshot.val();
-});
-
-// setTimeout(() => {console.log("done loading database");console.log(database)},1500);
-// rootRef.on("value", function(snapshot) {
-//    console.log(snapshot.val());
-//    database = snapshot.val();
-// }, function (error) {
-//    console.log("Error: " + error.code);
-// });
-
-//const textData = require("./mockTextData.json");
 
 const app = conversation({ debug: true });
 
@@ -118,13 +89,16 @@ app.handle("bookSelected", (conv) => {
       },
     })
   );
+
+  let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
+  conv.add(ssml);
 });
 
 app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   const chunk = conv.user.params[bookTitle]["chunk"];
 
-  let bookText = database[bookTitle]["Text"][chunk]; //assume its an array of sentences
+  let bookText = database[bookTitle]["Text"][chunk]; //An Array of Sentences
   let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
 
   let response = analyseText(bookText, userInput);
@@ -161,10 +135,9 @@ app.handle("analyseUserInput", (conv) => {
     );
     //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
     let ssml = `<speak>
-      <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
-      </audio>
-    </speak>`;
-
+        <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
+        </audio>
+      </speak>`;
     conv.add(ssml);
   }
 });
@@ -216,7 +189,7 @@ function getText(conv) {
   let bookTitle = conv.user.params.currentBook;
   let { chunk, size } = conv.user.params[bookTitle];
 
-  let text;
+  let text = "";
   if (chunk >= size) {
     text = "The End.";
     conv.add(
@@ -224,7 +197,11 @@ function getText(conv) {
     );
     conv.scene.next.name = "FINISH";
   } else {
-    text = database[bookTitle]["Text"][chunk];
+    let temp = database[bookTitle]["Text"][chunk];
+    for(let i = 0; i < temp.length; i++)
+    {
+      text = text + temp[i] + " ";
+    }
   }
   return text;
 }
