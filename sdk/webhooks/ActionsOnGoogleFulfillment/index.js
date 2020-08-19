@@ -1,16 +1,6 @@
 const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
-// var admin = require("firebase-admin");
-// const serviceAccount = require("./serviceAccountKey.json");
 const Diff = require("diff");
-
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: "https://reading-dc6dd.firebaseio.com",
-// });
-
-// var db = admin.database();
-// var rootRef = db.ref();
 
 const database = require("./reformatted4.json");
 
@@ -25,53 +15,26 @@ app.handle("welcome", (conv) => {
     conv.scene.next.name = "actions.page.END_CONVERSATION";
     return;
   }
-  conv.add("Welcome to Reading with the Google Assistant!");
+
+  let books = [];
+  let keys = Object.keys(database);
+  for (i in keys) {
+    let imgSrc = database[keys[i]]["Image"];
+    let title = keys[i];
+    let book = { imgSrc, title };
+    books.push(book);
+  }
+
   conv.add(
     new Canvas({
       url: "https://reading-dc6dd.web.app",
+      data: {
+        command: "WRITE_TO_LIBRARY",
+        books: books,
+      },
     })
   );
-
-  //Load library
-  // rootRef
-  //   .once("value")
-  //   .then((snapshot) => {
-  //     database = snapshot.val();
-  //     let books = [];
-  //     for (key in Object.keys(database)) {
-  //       let imgSrc = database[key]["Image"];
-  //       let title = key;
-  //       let book = { imgSrc, title };
-  //       books.push(book);
-  //     }
-
-  //     conv.add(
-  //       new Canvas({
-  //         data: {
-  //           command: "WRITE_TO_LIBRARY",
-  //           books: books,
-  //         },
-  //       })
-  //     );
-  //   })
-  //   .catch((err) => console.log(err));
-
-    // let books = [];
-    //   for (key in Object.keys(database)) {
-    //     let imgSrc = database[key]["Image"];
-    //     let title = key;
-    //     let book = { imgSrc, title };
-    //     books.push(book);
-    //   }
-
-    //   conv.add(
-    //     new Canvas({
-    //       data: {
-    //         command: "WRITE_TO_LIBRARY",
-    //         books: books,
-    //       },
-    //     })
-    //   );
+  conv.add("Welcome to Reading with the Google Assistant!");
 });
 
 app.handle("fallback", (conv) => {
@@ -107,8 +70,7 @@ app.handle("bookSelected", (conv) => {
     })
   );
 
-  checkForchapter(conv,text);
-
+  checkForchapter(conv, text);
 });
 
 app.handle("analyseUserInput", (conv) => {
@@ -133,7 +95,6 @@ app.handle("analyseUserInput", (conv) => {
     let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
     conv.add(ssml);
   } else {
-
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     let text = getText(conv);
@@ -182,7 +143,7 @@ app.handle("nextChunk", (conv) => {
     })
   );
 
-  checkForchapter(conv,text);
+  checkForchapter(conv, text);
 });
 
 app.handle("restartBook", (conv) => {
@@ -216,8 +177,7 @@ function getText(conv) {
     conv.scene.next.name = "FINISH";
   } else {
     let temp = database[bookTitle]["Text"][chunk];
-    for(let i = 0; i < temp.length; i++)
-    {
+    for (let i = 0; i < temp.length; i++) {
       text = text + temp[i] + " ";
     }
   }
@@ -354,11 +314,10 @@ function splitIntoSentences(str) {
   }
 }
 
-function checkForchapter(conv, text){
+function checkForchapter(conv, text) {
   const bookTitle = conv.user.params.currentBook;
-  if(/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) //if this chunk is a new chapter
-  {
-    conv.user.params[bookTitle]["chunk"] += 1;
+  if (/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) {
+    //if this chunk is a new chapter
     let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
     conv.add(ssml);
   }

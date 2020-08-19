@@ -2,6 +2,7 @@
 #libraryContainer {
   height: 100%;
   border: 3px solid black;
+  margin-top: 10vh;
 }
 
 .bookshelf {
