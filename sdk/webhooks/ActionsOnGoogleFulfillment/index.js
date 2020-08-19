@@ -5,19 +5,18 @@ const serviceAccount = require("./serviceAccountKey.json");
 //const {apiKey} = require("./APIKey.json");
 const Diff = require("diff");
 
+// Set the configuration for your app
+// TODO: Replace with your project's config object
+// var config = {
+//   apiKey: apiKey,
+//   authDomain: "reading-dc6dd.firebaseapp.com",
+//   databaseURL: "https://reading-dc6dd.firebaseio.com",
+//   storageBucket: "bucket.appspot.com"
+// };
+// firebase.initializeApp(config);
 
-  // Set the configuration for your app
-  // TODO: Replace with your project's config object
-  // var config = {
-  //   apiKey: apiKey,
-  //   authDomain: "reading-dc6dd.firebaseapp.com",
-  //   databaseURL: "https://reading-dc6dd.firebaseio.com",
-  //   storageBucket: "bucket.appspot.com"
-  // };
-  // firebase.initializeApp(config);
-
-  // // Get a reference to the database service
-  // var database = firebase.database();
+// // Get a reference to the database service
+// var database = firebase.database();
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -30,9 +29,9 @@ var rootRef = db.ref();
 let database;
 
 //consider moving into the welcome intent
-rootRef.once('value', function(snapshot){
-    database = snapshot.val();
-})
+rootRef.once("value", function (snapshot) {
+  database = snapshot.val();
+});
 
 // setTimeout(() => {console.log("done loading database");console.log(database)},1500);
 // rootRef.on("value", function(snapshot) {
@@ -63,23 +62,28 @@ app.handle("welcome", (conv) => {
   );
 
   //Load library
-  let books = [];
-  for(key in Object.keys(database))
-  {
-    let imgSrc = database[key]["Image"];
-    let title = key;
-    let book = {imgSrc, title};
-    books.push(book);
-  }
+  rootRef
+    .once("value")
+    .then((snapshot) => {
+      database = snapshot.val();
+      let books = [];
+      for (key in Object.keys(database)) {
+        let imgSrc = database[key]["Image"];
+        let title = key;
+        let book = { imgSrc, title };
+        books.push(book);
+      }
 
-  conv.add(
-    new Canvas({
-      data: {
-        command: "WRITE_TO_LIBRARY",
-        books: books
-      },
+      conv.add(
+        new Canvas({
+          data: {
+            command: "WRITE_TO_LIBRARY",
+            books: books,
+          },
+        })
+      );
     })
-  );
+    .catch((err) => console.log(err));
 });
 
 app.handle("fallback", (conv) => {
@@ -91,7 +95,10 @@ app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
   const bookTitle = toTitleCase(conv.session.params.bookTitle); //user input
 
-  if (conv.user.params[bookTitle] == undefined || conv.user.params[bookTitle]["chunk"] == undefined) {
+  if (
+    conv.user.params[bookTitle] == undefined ||
+    conv.user.params[bookTitle]["chunk"] == undefined
+  ) {
     //define key value pair if it doesnt exist
     conv.user.params[bookTitle] = {
       chunk: 0,
@@ -117,7 +124,7 @@ app.handle("analyseUserInput", (conv) => {
   const bookTitle = conv.user.params.currentBook;
   const chunk = conv.user.params[bookTitle]["chunk"];
 
-  let bookText = splitBySentences(database[bookTitle]["Text"][chunk]); //assume its an array of sentences
+  let bookText = database[bookTitle]["Text"][chunk]; //assume its an array of sentences
   let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
 
   let response = analyseText(bookText, userInput);
@@ -134,7 +141,7 @@ app.handle("analyseUserInput", (conv) => {
           // book: bookText,
           // analysis: res
           words: response.words,
-          ranges: response.ranges
+          ranges: response.ranges,
         },
       })
     );
@@ -157,7 +164,7 @@ app.handle("analyseUserInput", (conv) => {
       <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
       </audio>
     </speak>`;
-    
+
     conv.add(ssml);
   }
 });
@@ -223,12 +230,9 @@ function getText(conv) {
 }
 
 function toTitleCase(str) {
-  return str.replace(
-      /\w\S*/g,
-      function(txt) {
-          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      }
-  );
+  return str.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
 }
 
 //assumes book paragraph and userParagraph are arrays of sentences
@@ -340,7 +344,8 @@ function stripPunctuation(str) {
 }
 
 function splitBySentences(str) {
-  if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) { //prevent null return on .match() call
+  if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) {
+    //prevent null return on .match() call
     let split = str
       .replace(/(?<=(mr|Mr|Ms|md|Md|Dr|dr|mrs|Mrs|Sr|Jr|jr|sr))\./g, "@")
       .match(/[^.?!]+[.!?]+[\])'"`’”]*/g);

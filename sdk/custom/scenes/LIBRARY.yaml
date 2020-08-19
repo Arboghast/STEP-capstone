@@ -16,8 +16,6 @@ slots:
               variants:
               - speech: What is the title of the book you would like to read?
             suggestions:
-            - title: Aladdin and the Magic Lamp
-            - title: Alice's Adventures in Wonderland
             - title: The Book of DRAGONS
             - title: The Cash Boy
   required: true
