@@ -1,4 +1,3 @@
-
 /**
  * Book Card Object for displays only
  */
