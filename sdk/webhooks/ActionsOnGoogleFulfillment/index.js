@@ -90,12 +90,7 @@ app.handle("bookSelected", (conv) => {
     })
   );
 
-  if(conv.user.params[bookTitle]["chunk"] == 0)
-  {
-    conv.user.params[bookTitle]["chunk"] += 1;
-    let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
-    conv.add(ssml);
-  }
+  checkForchapter(conv,text);
 
 });
 
@@ -104,21 +99,15 @@ app.handle("analyseUserInput", (conv) => {
   const chunk = conv.user.params[bookTitle]["chunk"];
 
   let bookText = database[bookTitle]["Text"][chunk]; //An Array of Sentences
-  let userInput = splitBySentences(conv.session.params.userInput); //split by puncuation
+  let userInput = splitIntoSentences(conv.session.params.userInput); //split by puncuation
 
   let response = analyseText(bookText, userInput);
-  //let response = { assistantOutput: "testing" };
 
   if (response.assistantOutput != "") {
     conv.add(
       new Canvas({
         data: {
           command: "TEXT_FEEDBACK",
-          // words: wordsData,
-          // ranges: rangesData,
-          // input: userInput,
-          // book: bookText,
-          // analysis: res
           words: response.words,
           ranges: response.ranges,
         },
@@ -127,6 +116,7 @@ app.handle("analyseUserInput", (conv) => {
     let ssml = `<speak><mark name="OK"/>${response.assistantOutput}<mark name="FIN"/></speak>`;
     conv.add(ssml);
   } else {
+
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     let text = getText(conv);
@@ -138,6 +128,7 @@ app.handle("analyseUserInput", (conv) => {
         },
       })
     );
+
     //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
     let ssml = `<speak>
         <audio src="https://rpg.hamsterrepublic.com/wiki-images/1/12/Ping-da-ding-ding-ding.ogg">text
@@ -173,6 +164,8 @@ app.handle("nextChunk", (conv) => {
       },
     })
   );
+
+  checkForchapter(conv,text);
 });
 
 app.handle("restartBook", (conv) => {
@@ -188,6 +181,8 @@ app.handle("restartBook", (conv) => {
       },
     })
   );
+
+  checkForchapter(conv, database[bookTitle]["Text"][0]);
 });
 
 function getText(conv) {
@@ -325,7 +320,7 @@ function stripPunctuation(str) {
   return str.replace(/[,\/#!$%\^&\*;:'"{}=\_`~()]/g, "").replace(/-/g, " ");
 }
 
-function splitBySentences(str) {
+function splitIntoSentences(str) {
   if (/[^.?!]+[.!?]+[\])'"`’”]*/g.test(str)) {
     //prevent null return on .match() call
     let split = str
@@ -338,6 +333,30 @@ function splitBySentences(str) {
     return split;
   } else {
     return [str];
+  }
+}
+
+function checkForchapter(conv, text){
+  const bookTitle = conv.user.params.currentBook;
+  if(/^CHAPTER/gi.test(text)) //if this chunk is a new chapter
+  {
+    conv.user.params[bookTitle]["chunk"] += 1;
+    let spl = text.split(/\r\n/gi);
+
+    let ssml = `<speak>`;
+    for(let i = 0; i < spl.length-1; i++)
+    {
+      ssml += spl[i] + '<break time="500ms"/>';
+    }
+    ssml += spl[spl.length-1];
+    ssml += '<mark name="FIN"/></speak>';
+    conv.add(ssml);
+  }
+  else if(conv.user.params[bookTitle]["chunk"] == 0) //if this chunk is a title
+  {
+    conv.user.params[bookTitle]["chunk"] += 1;
+    let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
+    conv.add(ssml);
   }
 }
 
