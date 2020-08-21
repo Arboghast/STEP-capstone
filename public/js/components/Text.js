@@ -21,7 +21,7 @@ export class Text {
   //init page-flip.js
   loadPageFlipper(){
     this.pageFlip = new St.PageFlip(this.textContainer, { 
-      width: 1200, 
+      width: 1200, //dimensions of the nest hub max display resolution
       height: 800,
       startPage: 1,
       useMouseEvents: false

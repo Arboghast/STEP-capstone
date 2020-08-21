@@ -16,11 +16,13 @@ export class Home{
     this.view.removeChild(this.library.getLibrary());
     this.view.appendChild(this.text.getText());
     this.text.loadPageFlipper(); //do it here so that the dom is properly updated first
+    document.body.style.overflow = "hidden";
   }
 
   openLibrary(){
     this.view.removeChild(this.text.getText());
     this.view.appendChild(this.library.getLibrary());
+    document.body.style.overflow = "visible";
   }
 
   getLibrary(){
