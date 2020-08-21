@@ -21,8 +21,8 @@ export class Text {
   //init page-flip.js
   loadPageFlipper(){
     this.pageFlip = new St.PageFlip(this.textContainer, { 
-      width: 800, 
-      height: 600,
+      width: 1200, 
+      height: 800,
       startPage: 1,
       useMouseEvents: false
     });
