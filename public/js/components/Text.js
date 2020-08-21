@@ -23,6 +23,8 @@ export class Text {
     this.pageFlip = new St.PageFlip(this.textContainer, { 
       width: 800, 
       height: 600,
+      startPage: 1,
+      useMouseEvents: false
     });
     this.pageFlip.loadFromHTML(document.querySelectorAll(".my-page"));
   }
