@@ -17,8 +17,10 @@ export class Action {
       BOOK_SELECTED: (data) => {
         this.scene.getText().setText(data.text);
         this.scene.openText();
+        this.scene.getText().flip(); //init: first flip
       },
       CHANGE_TEXT: (data) => {
+        this.scene.getText().flip(); //flip here???
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
