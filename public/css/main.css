@@ -13,18 +13,11 @@ body {
 .view {
   position: relative;
   flex: 1;
+  display:flex;
+  align-items: center;
 }
 
 canvas {
   display: block;
   background-color: white;
 }
-
-/* html,
-body {
-    height: 100%;
-}
-
-canvas {
-    position: fixed;
-} */

@@ -19,6 +19,7 @@ export class Action {
         this.scene.openText();
       },
       CHANGE_TEXT: (data) => {
+        this.scene.getText().flip();
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
