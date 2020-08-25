@@ -9,3 +9,7 @@ window.addEventListener('load', () => {
   // Call setCallbacks to register interactive canvas
   window.scene.action.setCallbacks();
 });
+
+window.interactiveCanvas.getHeaderHeightPx().then((headerHeight) => {
+  document.body.style.paddingTop = `${headerHeight}px`;
+});

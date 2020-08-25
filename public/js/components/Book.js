@@ -32,13 +32,13 @@ export class Book{
     }
 
     openBook(){ 
-        this.bookContainer.setAttribute("data-micron","bounce");
+        this.bookContainer.setAttribute("data-micron","fade");
         window.interactiveCanvas.sendTextQuery(this.title); //triggers book selection
     }
 
     removeAnimation(){
         this.bookContainer.removeAttribute("data-micron");
-        this.bookContainer.classList.remove("mjs-bounce", "mjs-ease-in-out");
+        this.bookContainer.classList.remove("mjs-fade", "mjs-ease-in-out");
         this.bookContainer.style.removeProperty("animation-duration");
     }
 
