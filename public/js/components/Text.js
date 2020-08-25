@@ -14,24 +14,6 @@ export class Text {
   
 
   constructor() {
-    this.createTextContainer();
-    this.textContainer.classList.add("text-container");
-    
-    this.instance = new Mark(this.text); //init Mark.js
-  }
-
-  //init page-flip.js
-  loadPageFlipper(){
-    this.pageFlip = new St.PageFlip(this.textContainer, { 
-      width: 1200, //dimensions of the nest hub max display resolution
-      height: 800,
-      startPage: 1,
-      useMouseEvents: false
-    });
-    this.pageFlip.loadFromHTML(document.querySelectorAll(".my-page"));
-  }
-
-  createTextContainer(){
     this.textContainer = document.createElement("div");
     this.textContainer.classList.add("text-container");
     this.textContainer.id = "book";
@@ -51,6 +33,19 @@ export class Text {
     page2.appendChild(container);
     this.textContainer.appendChild(page1);
     this.textContainer.appendChild(page2);
+
+    this.instance = new Mark(this.text); //init Mark.js
+  }
+
+  //init page-flip.js
+  loadPageFlipper(){
+    this.pageFlip = new St.PageFlip(this.textContainer, { 
+      width: 1200, //dimensions of the nest hub max display resolution
+      height: 800,
+      startPage: 1,
+      useMouseEvents: false
+    });
+    this.pageFlip.loadFromHTML(document.querySelectorAll(".my-page"));
   }
 
   flip() {

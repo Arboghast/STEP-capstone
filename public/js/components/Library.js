@@ -35,7 +35,7 @@ export class Library{
         for(let i = 0; i < books.length; i++)
         {
             let gw = new Book(books[i]["title"], books[i]["imgSrc"]);
-            gw.setProgress(Math.round(books[i]["chunkNumber"] * 100)); //TODO
+            gw.setProgress(Math.round(books[i]["chunkNumber"] * 100)); 
             this.bookObjects.push(gw);
             this.books.appendChild(gw.getBook());
         }
