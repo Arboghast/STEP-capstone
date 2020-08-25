@@ -23,6 +23,7 @@ export class Action {
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
+        this.scene.getLibrary().updateProgress(data.progress);
         this.scene.openLibrary();
       },
       TEXT_FEEDBACK: async (data) => {

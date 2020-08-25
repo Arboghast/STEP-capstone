@@ -15,6 +15,8 @@ export class Text {
 
   constructor() {
     this.createTextContainer();
+    this.textContainer.classList.add("text-container");
+    
     this.instance = new Mark(this.text); //init Mark.js
   }
 

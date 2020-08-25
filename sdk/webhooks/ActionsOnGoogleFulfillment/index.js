@@ -21,7 +21,11 @@ app.handle("welcome", (conv) => {
   for (i in keys) {
     let imgSrc = database[keys[i]]["Image"];
     let title = keys[i];
-    let book = { imgSrc, title };
+    let chunkNumber = 0; 
+    if(conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined){
+      chunkNumber = conv.user.params[title]["chunk"] / conv.user.params[title]["size"]; //percentage
+    } 
+    let book = { imgSrc, title, chunkNumber };
     books.push(book);
   }
 
@@ -118,11 +122,24 @@ app.handle("analyseUserInput", (conv) => {
 
 app.handle("openLibrary", (conv) => {
   //scene progression handled by AOG GOTO_LIBRARY intent
+
+  let progress = [];
+  let keys = Object.keys(database);
+  for (i in keys) {
+    let title = keys[i];
+    let chunkNumber = 0; 
+    if(conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined){
+      chunkNumber = conv.user.params[title]["chunk"]/ conv.user.params[title]["size"]; //percentage
+    } 
+    progress.push(chunkNumber);
+  }
+
   conv.user.params.currentBook = null;
   conv.add(
     new Canvas({
       data: {
         command: "OPEN_LIBRARY",
+        progress: progress
       },
     })
   );
