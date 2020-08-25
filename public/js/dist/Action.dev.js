@@ -40,6 +40,9 @@ function () {
         _this.scene.openText();
       },
       CHANGE_TEXT: function CHANGE_TEXT(data) {
+        _this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
+
+
         _this.scene.getText().flip();
 
         _this.scene.getText().setText(data.text);
@@ -50,20 +53,9 @@ function () {
         _this.scene.openLibrary();
       },
       TEXT_FEEDBACK: function TEXT_FEEDBACK(data) {
-        return regeneratorRuntime.async(function TEXT_FEEDBACK$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _this.scene.getText().setRanges(data.ranges);
+        _this.scene.getText().setRanges(data.ranges);
 
-                _this.scene.getText().setWords(data.words);
-
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        });
+        _this.scene.getText().setWords(data.words);
       }
     };
     this.commands.WRITE_TO_LIBRARY.bind(this);
@@ -94,18 +86,18 @@ function () {
         },
         //Synchronize Assistant dialogue with text highlighting and page transition
         onTtsMark: function onTtsMark(markName) {
-          return regeneratorRuntime.async(function onTtsMark$(_context2) {
+          return regeneratorRuntime.async(function onTtsMark$(_context) {
             while (1) {
-              switch (_context2.prev = _context2.next) {
+              switch (_context.prev = _context.next) {
                 case 0:
                   if (!(markName === "FIN")) {
-                    _context2.next = 4;
+                    _context.next = 4;
                     break;
                   }
 
                   _this2.scene.getText().clearHighlights();
 
-                  _context2.next = 4;
+                  _context.next = 4;
                   return regeneratorRuntime.awrap(_this2.canvas.sendTextQuery("Go next"));
 
                 case 4:
@@ -119,18 +111,16 @@ function () {
                   }
 
                   if (!(markName === 'ENDCHAP')) {
-                    _context2.next = 10;
+                    _context.next = 9;
                     break;
                   }
 
-                  _this2.scene.getText().textFont();
-
-                  _context2.next = 10;
+                  _context.next = 9;
                   return regeneratorRuntime.awrap(_this2.canvas.sendTextQuery("Go next"));
 
-                case 10:
+                case 9:
                 case "end":
-                  return _context2.stop();
+                  return _context.stop();
               }
             }
           });

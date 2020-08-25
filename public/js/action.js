@@ -19,6 +19,7 @@ export class Action {
         this.scene.openText();
       },
       CHANGE_TEXT: (data) => {
+        this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
         this.scene.getText().flip();
         this.scene.getText().setText(data.text);
       },
@@ -26,7 +27,7 @@ export class Action {
         this.scene.getLibrary().updateProgress(data.progress);
         this.scene.openLibrary();
       },
-      TEXT_FEEDBACK: async (data) => {
+      TEXT_FEEDBACK: (data) => {
         this.scene.getText().setRanges(data.ranges);
         this.scene.getText().setWords(data.words);
       },
@@ -66,8 +67,8 @@ export class Action {
           this.scene.getText().titleFont();
         }
         if (markName === 'ENDCHAP') {
-          this.scene.getText().textFont();
-          await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
+          await this.canvas.sendTextQuery("Go next");
+          //this.scene.getText().textFont(); the function is not behaving asynchronously
         }
       }
     };
