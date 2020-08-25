@@ -1,8 +1,6 @@
 /*Library Class Styling below*/
 #libraryContainer {
   height: 100%;
-  /*background-image: url("../walnut.jpg");
-  background-size: cover;*/
 }
 
 .books {
@@ -15,6 +13,12 @@
   white-space: nowrap;
   padding-bottom: 30px;
   padding-top: 10px;
+}
+
+.books {
+  -moz-perspective: 100px;
+  -moz-transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 
 /*Book Class Styling below*/
@@ -32,19 +36,16 @@
   box-shadow: 5px 5px 20px #333;
 }
 
-.book:last-child{
-  /*margin-right: 5%;*/
-}
-
 .book:first-child{
   margin-left: 0;
 }
 
-.book img { vertical-align: middle; }
-
 .book img {
+  vertical-align: middle; 
   height: 100%;
   width: 100%;
+  position: relative;
+  max-width: 100%;
 }
 
 .book:after {
@@ -72,10 +73,6 @@
   z-index: -1;
 }
 
-.book img {
-  position: relative;
-  max-width: 100%;
-}
 
 .book {
   position: relative;
@@ -84,12 +81,6 @@
   -webkit-transform: perspective(100) rotateY(-3deg);
   outline: 1px solid transparent; 
   box-shadow: none;
-}
-
-.books {
-  -moz-perspective: 100px;
-  -moz-transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
 }
 
 /* Text Class Styling Below*/
@@ -139,6 +130,3 @@
   display: none;
 }
 
-a{
-  display: contents;
-}
