@@ -21,7 +21,8 @@ app.handle("welcome", (conv) => {
   for (i in keys) {
     let imgSrc = database[keys[i]]["Image"];
     let title = keys[i];
-    let book = { imgSrc, title };
+    let chunkNumber = getProgress(title,conv);
+    let book = { imgSrc, title, chunkNumber };
     books.push(book);
   }
 
@@ -118,11 +119,21 @@ app.handle("analyseUserInput", (conv) => {
 
 app.handle("openLibrary", (conv) => {
   //scene progression handled by AOG GOTO_LIBRARY intent
+
+  let progress = [];
+  let keys = Object.keys(database);
+  for (i in keys) {
+    let title = keys[i];
+    let chunkNumber = getProgress(title, conv);
+    progress.push(chunkNumber);
+  }
+
   conv.user.params.currentBook = null;
   conv.add(
     new Canvas({
       data: {
         command: "OPEN_LIBRARY",
+        progress: progress
       },
     })
   );
@@ -163,6 +174,14 @@ app.handle("restartBook", (conv) => {
 
   checkForchapter(conv, text);
 });
+
+function getProgress(title, conv){
+  if(conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined){
+    return conv.user.params[title]["chunk"] / conv.user.params[title]["size"]; //percentage
+  } else {
+    return 0;
+  }
+}
 
 function getText(conv) {
   let bookTitle = conv.user.params.currentBook;
@@ -318,7 +337,7 @@ function checkForchapter(conv, text) {
   const bookTitle = conv.user.params.currentBook;
   if (/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) {
     //if this chunk is a new chapter
-    let ssml = `<speak>${text}<mark name="FIN"/></speak>`;
+    let ssml = `<speak><mark name="CHAP"/>${text}<mark name="ENDCHAP"/></speak>`;
     conv.add(ssml);
   }
 }

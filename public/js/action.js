@@ -20,12 +20,14 @@ export class Action {
       },
       CHANGE_TEXT: (data) => {
         this.scene.getText().flip();
+        this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
+        this.scene.getLibrary().updateProgress(data.progress);
         this.scene.openLibrary();
       },
-      TEXT_FEEDBACK: async (data) => {
+      TEXT_FEEDBACK: (data) => {
         this.scene.getText().setRanges(data.ranges);
         this.scene.getText().setWords(data.words);
       },
@@ -60,6 +62,13 @@ export class Action {
         }
         if (markName ==='OK') { //begining of assistants speech
           this.scene.getText().startHighlighting();
+        }
+        if (markName === 'CHAP') {
+          this.scene.getText().titleFont();
+        }
+        if (markName === 'ENDCHAP') {
+          await this.canvas.sendTextQuery("Go next");
+          //this.scene.getText().textFont(); the function is not behaving asynchronously
         }
       }
     };
