@@ -45,7 +45,7 @@ export class Text {
 
     this.text = document.createElement("p");
     this.text.id = "special";
-    this.text.classList.add("text");
+    this.text.classList.add("text"); //here
 
     container.appendChild(this.text);
     page2.appendChild(container);
@@ -98,6 +98,16 @@ export class Text {
 
   clearHighlights(){
       this.instance.unmark();
+  }
+
+  titleFont(){
+    this.text.classList.remove("text");
+    this.text.classList.add("title");
+  }
+
+  textFont(){
+    this.text.classList.remove("title");
+    this.text.classList.add("text");
   }
 
   getText() {

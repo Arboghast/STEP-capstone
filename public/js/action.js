@@ -62,6 +62,13 @@ export class Action {
         if (markName ==='OK') { //begining of assistants speech
           this.scene.getText().startHighlighting();
         }
+        if (markName === 'CHAP') {
+          this.scene.getText().titleFont();
+        }
+        if (markName === 'ENDCHAP') {
+          this.scene.getText().textFont();
+          await this.canvas.sendTextQuery("Go next"); //move to next page once assistant is done reading
+        }
       }
     };
     callbacks.onUpdate.bind(this);

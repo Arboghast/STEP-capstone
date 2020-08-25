@@ -28,12 +28,7 @@ app.handle("welcome", function (conv) {
   for (i in keys) {
     var imgSrc = database[keys[i]]["Image"];
     var title = keys[i];
-    var chunkNumber = 0;
-
-    if (conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined) {
-      chunkNumber = conv.user.params[title]["chunk"] / conv.user.params[title]["size"]; //percentage
-    }
-
+    var chunkNumber = getProgress(title, conv);
     var book = {
       imgSrc: imgSrc,
       title: title,
@@ -119,12 +114,7 @@ app.handle("openLibrary", function (conv) {
 
   for (i in keys) {
     var title = keys[i];
-    var chunkNumber = 0;
-
-    if (conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined) {
-      chunkNumber = conv.user.params[title]["chunk"] / conv.user.params[title]["size"]; //percentage
-    }
-
+    var chunkNumber = getProgress(title, conv);
     progress.push(chunkNumber);
   }
 
@@ -165,6 +155,14 @@ app.handle("restartBook", function (conv) {
   }));
   checkForchapter(conv, text);
 });
+
+function getProgress(title, conv) {
+  if (conv.user.params[title] != undefined && conv.user.params[title]["chunk"] != undefined) {
+    return conv.user.params[title]["chunk"] / conv.user.params[title]["size"]; //percentage
+  } else {
+    return 0;
+  }
+}
 
 function getText(conv) {
   var bookTitle = conv.user.params.currentBook;
@@ -332,7 +330,7 @@ function checkForchapter(conv, text) {
 
   if (/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) {
     //if this chunk is a new chapter
-    var ssml = "<speak>".concat(text, "<mark name=\"FIN\"/></speak>");
+    var ssml = "<speak><mark name=\"CHAP\"/>".concat(text, "<mark name=\"ENDCHAP\"/></speak>");
     conv.add(ssml);
   }
 }
