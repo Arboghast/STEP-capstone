@@ -19,8 +19,8 @@ export class Action {
         this.scene.openText();
       },
       CHANGE_TEXT: (data) => {
-        this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
         this.scene.getText().flip();
+        this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
