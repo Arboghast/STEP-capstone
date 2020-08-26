@@ -194,9 +194,6 @@ function toTitleCase(str) {
 
 
 function analyseText(bookParagraph, userParagraph) {
-  var options = {
-    ignoreCase: true
-  };
   var wordsWrong = [];
   var sentencesWrong = [];
   var apostropheDictionary = {};
@@ -216,30 +213,23 @@ function analyseText(bookParagraph, userParagraph) {
         }
       }
 
-      var bookText = removeMarks(stripPunctuation(bookParagraph[_i2]));
-      var userText = removeMarks(stripPunctuation(userParagraph[_i2]));
-      var analysis = Diff.diffWords(bookText, userText, options);
+      var bookText = removeMarks(stripPunctuation(bookParagraph[_i2])).trim();
+      var userText = removeMarks(stripPunctuation(userParagraph[_i2])).trim();
+      var analysis = Diff.diffWords(bookText, userText, {
+        ignoreCase: true
+      });
       var toggle = false;
-      var override = true;
-      var bt = bookText.split(" ").length;
-      var ut = userText.split(" ").length;
-
-      if (bt != ut) {
-        sentencesWrong.push(_i2); //if they are not the same length, then at least one word was added/removed
-
-        override = false; //to prevent repeat additions of this sentence
-      }
 
       for (var j = 0; j < analysis.length; j++) {
         //if user adds a word, we cant highlight that word on the screen so no
         //need to pass it into the wrong words array, just mark the sentence as wrong as compensation
         if (analysis[j].removed) {
-          wordsWrong.push(analysis[j].value);
+          wordsWrong.push(analysis[j].value.trim());
           toggle = true;
         }
       }
 
-      if (toggle && override) {
+      if (toggle) {
         sentencesWrong.push(_i2); //at least one wrong word in the sentence makes the entire sentence wrong
       }
     }
