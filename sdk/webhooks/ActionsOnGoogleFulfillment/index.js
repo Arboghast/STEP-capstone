@@ -2,7 +2,7 @@ const { conversation, Canvas } = require("@assistant/conversation");
 const functions = require("firebase-functions");
 const Diff = require("diff");
 
-const database = require("./reformatted4.json");
+const database = require("./reformattedX.json");
 
 const app = conversation({ debug: true });
 
@@ -90,6 +90,11 @@ app.handle("analyseUserInput", (conv) => {
           command: "TEXT_FEEDBACK",
           words: response.words,
           ranges: response.ranges,
+          analysis: response.analysis,
+          blen : bookText.length,
+          ulen : userInput.length,
+          split : userInput,
+          original : conv.session.params.userInput
         },
       })
     );
@@ -211,6 +216,7 @@ function toTitleCase(str) {
 
 //assumes book paragraph and userParagraph are arrays of sentences
 function analyseText(bookParagraph, userParagraph) {
+  let anal = [];
   let wordsWrong = [];
   let sentencesWrong = [];
   let apostropheDictionary = {};
@@ -218,6 +224,7 @@ function analyseText(bookParagraph, userParagraph) {
     if (i >= userParagraph.length) {
       //if true, the user did not say this sentence and will be considered wrong
       sentencesWrong.push(i);
+      anal.push(false);
     } else {
       let apos = bookParagraph[i].match(/[\w]\w*'\w*/gm); //captures all words with an apostrophe
       if (apos != null) {
@@ -230,6 +237,7 @@ function analyseText(bookParagraph, userParagraph) {
       let bookText = removeMarks(stripPunctuation(bookParagraph[i])).trim();
       let userText = removeMarks(stripPunctuation(userParagraph[i])).trim();
       let analysis = Diff.diffWords(bookText, userText, { ignoreCase: true });
+      anal.push(analysis);
 
       let toggle = false;
 
@@ -279,6 +287,7 @@ function analyseText(bookParagraph, userParagraph) {
     ranges: sentenceRanges,
     words: wordsWrong,
     assistantOutput: recompile,
+    analysis : anal
   };
 
   return responseJSON;
