@@ -61,7 +61,7 @@ app.handle("bookSelected", (conv) => {
   conv.user.params.currentBook = bookTitle;
 
   let text = getText(conv);
-  conv.add("Loading Book...");
+  checkForchapter(conv, text);
   conv.add(
     new Canvas({
       data: {
@@ -71,7 +71,6 @@ app.handle("bookSelected", (conv) => {
     })
   );
 
-  checkForchapter(conv, text);
 });
 
 app.handle("analyseUserInput", (conv) => {
@@ -90,11 +89,6 @@ app.handle("analyseUserInput", (conv) => {
           command: "TEXT_FEEDBACK",
           words: response.words,
           ranges: response.ranges,
-          analysis: response.analysis,
-          blen : bookText.length,
-          ulen : userInput.length,
-          split : userInput,
-          original : conv.session.params.userInput
         },
       })
     );
