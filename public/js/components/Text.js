@@ -80,14 +80,14 @@ export class Text {
           this.ranges[this.index]["length"] += 1;
           this.highlight();
         }
-      }, 50);
+      }, 60);
   }
 
   highlight() {
     this.instance.unmark();
     this.instance.markRanges(this.ranges);
     for (let i = 0; i < this.words.length; i++) {
-      this.instance.mark(this.words[i], { className: "red-highlight" });
+      this.instance.mark(this.words[i], { className: "red-highlight" , accuracy: "exactly"});
     }
   }
 

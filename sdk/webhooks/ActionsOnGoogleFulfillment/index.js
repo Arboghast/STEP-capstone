@@ -47,30 +47,36 @@ app.handle("bookSelected", (conv) => {
   //Selection of a book from the library scene
   const bookTitle = toTitleCase(conv.session.params.bookTitle); //user input
 
-  if (
-    conv.user.params[bookTitle] == undefined ||
-    conv.user.params[bookTitle]["chunk"] == undefined
-  ) {
-    //define key value pair if it doesnt exist
-    conv.user.params[bookTitle] = {
-      chunk: 0,
-      size: database[bookTitle]["Text"].length,
-    };
+  if(database[bookTitle] != undefined){
+    if (
+      conv.user.params[bookTitle] == undefined ||
+      conv.user.params[bookTitle]["chunk"] == undefined
+    ) {
+      //define key value pair if it doesnt exist
+      conv.user.params[bookTitle] = {
+        chunk: 0,
+        size: database[bookTitle]["Text"].length,
+      };
+    }
+  
+    conv.user.params.currentBook = bookTitle;
+  
+    let text = getText(conv);
+    checkForchapter(conv, text);
+    conv.add(
+      new Canvas({
+        data: {
+          command: "BOOK_SELECTED",
+          text: text,
+        },
+      })
+    );
   }
-
-  conv.user.params.currentBook = bookTitle;
-
-  let text = getText(conv);
-  checkForchapter(conv, text);
-  conv.add(
-    new Canvas({
-      data: {
-        command: "BOOK_SELECTED",
-        text: text,
-      },
-    })
-  );
-
+  else{
+    conv.add("I'm sorry, we cant find a book with that title.");
+    conv.add( new Canvas({}) );
+    conv.scene.next.name = "LIBRARY";
+  }
 });
 
 app.handle("analyseUserInput", (conv) => {
@@ -139,11 +145,11 @@ app.handle("openLibrary", (conv) => {
 });
 
 app.handle("nextChunk", (conv) => {
-  //scene progression handled by AOG NEXT intent
   const bookTitle = conv.user.params.currentBook;
   conv.user.params[bookTitle]["chunk"] += 1; //increment page
 
   let text = getText(conv); //send appropriate response based on user's position in the book
+  checkForchapter(conv, text);
   conv.add(
     new Canvas({
       data: {
@@ -153,7 +159,6 @@ app.handle("nextChunk", (conv) => {
     })
   );
 
-  checkForchapter(conv, text);
 });
 
 app.handle("restartBook", (conv) => {
@@ -162,6 +167,7 @@ app.handle("restartBook", (conv) => {
   conv.scene.next.name = "TEXT";
 
   let text = getText(conv);
+  checkForchapter(conv, text);
   conv.add(
     new Canvas({
       data: {
@@ -170,8 +176,6 @@ app.handle("restartBook", (conv) => {
       },
     })
   );
-
-  checkForchapter(conv, text);
 });
 
 function getProgress(title, conv){
@@ -210,7 +214,6 @@ function toTitleCase(str) {
 
 //assumes book paragraph and userParagraph are arrays of sentences
 function analyseText(bookParagraph, userParagraph) {
-  let anal = [];
   let wordsWrong = [];
   let sentencesWrong = [];
   let apostropheDictionary = {};
@@ -218,7 +221,6 @@ function analyseText(bookParagraph, userParagraph) {
     if (i >= userParagraph.length) {
       //if true, the user did not say this sentence and will be considered wrong
       sentencesWrong.push(i);
-      anal.push(false);
     } else {
       let apos = bookParagraph[i].match(/[\w]\w*'\w*/gm); //captures all words with an apostrophe
       if (apos != null) {
@@ -231,7 +233,6 @@ function analyseText(bookParagraph, userParagraph) {
       let bookText = removeMarks(stripPunctuation(bookParagraph[i])).trim();
       let userText = removeMarks(stripPunctuation(userParagraph[i])).trim();
       let analysis = Diff.diffWords(bookText, userText, { ignoreCase: true });
-      anal.push(analysis);
 
       let toggle = false;
 
@@ -280,8 +281,7 @@ function analyseText(bookParagraph, userParagraph) {
   let responseJSON = {
     ranges: sentenceRanges,
     words: wordsWrong,
-    assistantOutput: recompile,
-    analysis : anal
+    assistantOutput: recompile
   };
 
   return responseJSON;

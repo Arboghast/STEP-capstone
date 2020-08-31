@@ -54,23 +54,29 @@ app.handle("bookSelected", function (conv) {
   //Selection of a book from the library scene
   var bookTitle = toTitleCase(conv.session.params.bookTitle); //user input
 
-  if (conv.user.params[bookTitle] == undefined || conv.user.params[bookTitle]["chunk"] == undefined) {
-    //define key value pair if it doesnt exist
-    conv.user.params[bookTitle] = {
-      chunk: 0,
-      size: database[bookTitle]["Text"].length
-    };
-  }
-
-  conv.user.params.currentBook = bookTitle;
-  var text = getText(conv);
-  checkForchapter(conv, text);
-  conv.add(new Canvas({
-    data: {
-      command: "BOOK_SELECTED",
-      text: text
+  if (database[bookTitle] != undefined) {
+    if (conv.user.params[bookTitle] == undefined || conv.user.params[bookTitle]["chunk"] == undefined) {
+      //define key value pair if it doesnt exist
+      conv.user.params[bookTitle] = {
+        chunk: 0,
+        size: database[bookTitle]["Text"].length
+      };
     }
-  }));
+
+    conv.user.params.currentBook = bookTitle;
+    var text = getText(conv);
+    checkForchapter(conv, text);
+    conv.add(new Canvas({
+      data: {
+        command: "BOOK_SELECTED",
+        text: text
+      }
+    }));
+  } else {
+    conv.add("I'm sorry, we cant find a book with that title.");
+    conv.add(new Canvas({}));
+    conv.scene.next.name = "LIBRARY";
+  }
 });
 app.handle("analyseUserInput", function (conv) {
   var bookTitle = conv.user.params.currentBook;
@@ -126,19 +132,18 @@ app.handle("openLibrary", function (conv) {
   }));
 });
 app.handle("nextChunk", function (conv) {
-  //scene progression handled by AOG NEXT intent
   var bookTitle = conv.user.params.currentBook;
   conv.user.params[bookTitle]["chunk"] += 1; //increment page
 
   var text = getText(conv); //send appropriate response based on user's position in the book
 
+  checkForchapter(conv, text);
   conv.add(new Canvas({
     data: {
       command: "CHANGE_TEXT",
       text: text
     }
   }));
-  checkForchapter(conv, text);
 });
 app.handle("restartBook", function (conv) {
   var bookTitle = conv.user.params.currentBook;
@@ -146,13 +151,13 @@ app.handle("restartBook", function (conv) {
 
   conv.scene.next.name = "TEXT";
   var text = getText(conv);
+  checkForchapter(conv, text);
   conv.add(new Canvas({
     data: {
       command: "CHANGE_TEXT",
       text: text
     }
   }));
-  checkForchapter(conv, text);
 });
 
 function getProgress(title, conv) {
@@ -193,7 +198,6 @@ function toTitleCase(str) {
 
 
 function analyseText(bookParagraph, userParagraph) {
-  var anal = [];
   var wordsWrong = [];
   var sentencesWrong = [];
   var apostropheDictionary = {};
@@ -202,7 +206,6 @@ function analyseText(bookParagraph, userParagraph) {
     if (_i2 >= userParagraph.length) {
       //if true, the user did not say this sentence and will be considered wrong
       sentencesWrong.push(_i2);
-      anal.push(false);
     } else {
       var apos = bookParagraph[_i2].match(/[\w]\w*'\w*/gm); //captures all words with an apostrophe
 
@@ -219,7 +222,6 @@ function analyseText(bookParagraph, userParagraph) {
       var analysis = Diff.diffWords(bookText, userText, {
         ignoreCase: true
       });
-      anal.push(analysis);
       var toggle = false;
 
       for (var j = 0; j < analysis.length; j++) {
@@ -271,8 +273,7 @@ function analyseText(bookParagraph, userParagraph) {
   var responseJSON = {
     ranges: sentenceRanges,
     words: wordsWrong,
-    assistantOutput: recompile,
-    analysis: anal
+    assistantOutput: recompile
   };
   return responseJSON;
 } //given a paragraph, and a sentence number(index), return the starting index of the sentence and its length
