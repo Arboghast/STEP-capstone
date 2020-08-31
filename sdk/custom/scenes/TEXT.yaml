@@ -2,7 +2,6 @@ conditionalEvents:
 - condition: scene.slots.status == "FINAL"
   handler:
     webhookHandler: analyseUserInput
-  transitionToScene: TEXT
 intentEvents:
 - handler:
     webhookHandler: restartBook

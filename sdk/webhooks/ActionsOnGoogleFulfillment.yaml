@@ -8,5 +8,3 @@ handlers:
 - name: openLibrary
 httpsEndpoint:
   baseUrl: https://us-central1-reading-dc6dd.cloudfunctions.net/ActionsOnGoogleFulfillment
-#inlineCloudFunction:
-#  executeFunction: ActionsOnGoogleFulfillment
