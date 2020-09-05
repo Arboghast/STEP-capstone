@@ -114,9 +114,11 @@
 .title {
   font-family: minion-pro-display, serif;
   font-style: normal;
-  font-weight: 700;
-  line-height: 78px;
-  font-size: 64pt;
+  font-weight: 600;
+  line-height: 100px; /*changed from 74px to 100px */
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 78pt;
 }
 
 .red-highlight {

@@ -80,7 +80,7 @@ export class Text {
           this.ranges[this.index]["length"] += 1;
           this.highlight();
         }
-      }, 60);
+      }, 45);
   }
 
   highlight() {

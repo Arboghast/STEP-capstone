@@ -15,12 +15,27 @@ export class Action {
         this.scene.getLibrary().addToLibrary(data.books);
       },
       BOOK_SELECTED: (data) => {
+        if(data.title)
+        {
+          this.scene.getText().titleFont();
+        }
+        else
+        {
+          this.scene.getText().textFont();
+        }
         this.scene.getText().setText(data.text);
         this.scene.openText();
       },
       CHANGE_TEXT: (data) => {
         this.scene.getText().flip();
-        this.scene.getText().textFont(); //moved here to resolve async bug with TTS handlers
+        if(data.title)
+        {
+          this.scene.getText().titleFont();
+        }
+        else
+        {
+          this.scene.getText().textFont();
+        }
         this.scene.getText().setText(data.text);
       },
       OPEN_LIBRARY: (data) => {
@@ -62,9 +77,6 @@ export class Action {
         }
         if (markName ==='OK') { //begining of assistants speech
           this.scene.getText().startHighlighting();
-        }
-        if (markName === 'CHAP') {
-          this.scene.getText().titleFont();
         }
         if (markName === 'ENDCHAP') {
           await this.canvas.sendTextQuery("Go next");

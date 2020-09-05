@@ -65,11 +65,12 @@ app.handle("bookSelected", function (conv) {
 
     conv.user.params.currentBook = bookTitle;
     var text = getText(conv);
-    checkForchapter(conv, text);
+    var title = checkForchapter(conv, text);
     conv.add(new Canvas({
       data: {
         command: "BOOK_SELECTED",
-        text: text
+        text: text,
+        title: title
       }
     }));
   } else {
@@ -101,10 +102,12 @@ app.handle("analyseUserInput", function (conv) {
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     var text = getText(conv);
+    var title = checkForchapter(conv, text);
     conv.add(new Canvas({
       data: {
         command: "CHANGE_TEXT",
-        text: text
+        text: text,
+        title: title
       }
     })); //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
 
@@ -137,11 +140,12 @@ app.handle("nextChunk", function (conv) {
 
   var text = getText(conv); //send appropriate response based on user's position in the book
 
-  checkForchapter(conv, text);
+  var title = checkForchapter(conv, text);
   conv.add(new Canvas({
     data: {
       command: "CHANGE_TEXT",
-      text: text
+      text: text,
+      title: title
     }
   }));
 });
@@ -151,11 +155,12 @@ app.handle("restartBook", function (conv) {
 
   conv.scene.next.name = "TEXT";
   var text = getText(conv);
-  checkForchapter(conv, text);
+  var title = checkForchapter(conv, text);
   conv.add(new Canvas({
     data: {
       command: "CHANGE_TEXT",
-      text: text
+      text: text,
+      title: title
     }
   }));
 });
@@ -324,9 +329,12 @@ function checkForchapter(conv, text) {
 
   if (/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) {
     //if this chunk is a new chapter
-    var ssml = "<speak><mark name=\"CHAP\"/>".concat(text, "<mark name=\"ENDCHAP\"/></speak>");
+    var ssml = "<speak>".concat(text, "<mark name=\"ENDCHAP\"/></speak>");
     conv.add(ssml);
+    return true;
   }
+
+  return false;
 }
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);

@@ -62,12 +62,13 @@ app.handle("bookSelected", (conv) => {
     conv.user.params.currentBook = bookTitle;
   
     let text = getText(conv);
-    checkForchapter(conv, text);
+    let title = checkForchapter(conv, text);
     conv.add(
       new Canvas({
         data: {
           command: "BOOK_SELECTED",
           text: text,
+          title: title
         },
       })
     );
@@ -104,14 +105,16 @@ app.handle("analyseUserInput", (conv) => {
     //go next logic
     conv.user.params[bookTitle]["chunk"] += 1;
     let text = getText(conv);
+    let title = checkForchapter(conv, text);
     conv.add(
       new Canvas({
         data: {
-          command: "CHANGE_TEXT",
+         command: "CHANGE_TEXT",
           text: text,
-        },
-      })
-    );
+          title: title,
+       },
+     })
+   );
 
     //audio feedback + google requires some text in an ssml object, so we add "filler text" to the audio tag
     let ssml = `<speak>
@@ -149,12 +152,13 @@ app.handle("nextChunk", (conv) => {
   conv.user.params[bookTitle]["chunk"] += 1; //increment page
 
   let text = getText(conv); //send appropriate response based on user's position in the book
-  checkForchapter(conv, text);
+  let title = checkForchapter(conv, text);
   conv.add(
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
         text: text,
+        title: title,
       },
     })
   );
@@ -167,12 +171,13 @@ app.handle("restartBook", (conv) => {
   conv.scene.next.name = "TEXT";
 
   let text = getText(conv);
-  checkForchapter(conv, text);
+  let title = checkForchapter(conv, text);
   conv.add(
     new Canvas({
       data: {
         command: "CHANGE_TEXT",
         text: text,
+        title: title,
       },
     })
   );
@@ -330,9 +335,11 @@ function checkForchapter(conv, text) {
   const bookTitle = conv.user.params.currentBook;
   if (/^CHAPTER/gi.test(text) || conv.user.params[bookTitle]["chunk"] == 0) {
     //if this chunk is a new chapter
-    let ssml = `<speak><mark name="CHAP"/>${text}<mark name="ENDCHAP"/></speak>`;
+    let ssml = `<speak>${text}<mark name="ENDCHAP"/></speak>`;
     conv.add(ssml);
+    return true;
   }
+  return false;
 }
 
 exports.ActionsOnGoogleFulfillment = functions.https.onRequest(app);
