@@ -1,5 +1,5 @@
 # STEP-capstone
-Google STEP 2020
+Google STEP 2020 <br>
 This Repo contains the reading component of our educational Smart Display Application
 
 Noteable Dependencies:
