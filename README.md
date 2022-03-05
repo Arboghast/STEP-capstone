@@ -1,5 +1,6 @@
 # STEP-capstone
-The Reading component for an educational Smart Display Application
+Google STEP 2020
+This Repo contains the reading component of our educational Smart Display Application
 
 Noteable Dependencies:
 https://codepen.io/arbaoui_mehdi/pen/dthsy
