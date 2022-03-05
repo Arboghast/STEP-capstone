@@ -2,9 +2,9 @@
 Google STEP 2020 <br>
 This Repo contains the reading component of our educational Smart Display Application
 
-Noteable Dependencies:
-https://codepen.io/arbaoui_mehdi/pen/dthsy
-https://webkul.github.io/micron/#interactions-preview
-https://github.com/Nodlik/StPageFlip
-https://markjs.io/
-https://github.com/kpdecker/jsdiff
+Noteable Dependencies: <br>
+https://codepen.io/arbaoui_mehdi/pen/dthsy <br>
+https://webkul.github.io/micron/#interactions-preview <br>
+https://github.com/Nodlik/StPageFlip <br>
+https://markjs.io/ <br>
+https://github.com/kpdecker/jsdiff 
