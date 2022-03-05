@@ -1,5 +1,5 @@
 # STEP-capstone
-The Readings action for a smart display application.
+The Reading component for an educational Smart Display Application
 
 Noteable Dependencies:
 https://codepen.io/arbaoui_mehdi/pen/dthsy
